@@ -281,29 +281,49 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
     # ============================================================================
 
     @mcp.tool()
-    def nmap_scan(target: str, scan_type: str = "-sV", ports: str = "", additional_args: str = "") -> Dict[str, Any]:
+    def nmap_scan(
+        target: str,
+        scan_profile: str = "service_discovery",
+        port_scope: str = "default",
+        custom_ports: str = "",
+        timing: str = "normal",
+        use_recovery: bool = True
+    ) -> Dict[str, Any]:
         """
-        Execute an enhanced Nmap scan against a target with real-time logging.
+        Perform professional network reconnaissance to identify live systems, open ports, and active services.
+
+        Use this tool as the first step in any target investigation to map the network attack surface.
 
         Args:
-            target: The IP address or hostname to scan
-            scan_type: Scan type (e.g., -sV for version detection, -sC for scripts)
-            ports: Comma-separated list of ports or port ranges
-            additional_args: Additional Nmap arguments
-
-        Returns:
-            Scan results with enhanced telemetry
+            target: The network address (IP or hostname) to investigate.
+            scan_profile: High-level strategy for the investigation:
+                - 'host_discovery': Rapidly confirms if the target is online without probing ports (near-instant).
+                - 'service_discovery': Standard probe into common ports to identify running applications and their versions.
+                - 'default_scripts': Executes a standard suite of safe scripts to detect common misconfigurations and metadata.
+                - 'full_tcp': Deep exploration of the port surface area with high-confidence service identification.
+                - 'aggressive': Maximum-depth investigation including operating system detection and traceroute (slowest).
+            port_scope: Breadth of the port scan:
+                - 'default': Checks the most common 100 ports (very fast).
+                - 'top_1000': Checks the 1000 most frequently used commercial ports (balanced).
+                - 'all': Inspects every possible port from 1-65535 (extremely thorough but slow).
+                - 'custom': Targets only the specific ports defined in 'custom_ports'.
+            custom_ports: A list of specific ports or ranges (e.g., '80,443,8000-8080') used with port_scope='custom'.
+            timing: Optimization for execution speed versus network stealth:
+                - 'slow': Low-intensity scan designed for polite network interaction.
+                - 'normal': Balanced timing suitable for most professional environments.
+                - 'fast': High-intensity execution for rapid results on stable networks.
+            use_recovery: Enables intelligent retries and timeout management for unstable target connections.
         """
         data = {
             "target": target,
-            "scan_type": scan_type,
-            "ports": ports,
-            "additional_args": additional_args
+            "scan_profile": scan_profile,
+            "port_scope": port_scope,
+            "custom_ports": custom_ports,
+            "timing": timing,
+            "use_recovery": use_recovery
         }
-        logger.info(f"{HexStrikeColors.FIRE_RED}🔍 Initiating Nmap scan: {target}{HexStrikeColors.RESET}")
+        logger.info(f"{HexStrikeColors.FIRE_RED}🔍 Initiating {scan_profile} Nmap scan: {target} (Timing: {timing}){HexStrikeColors.RESET}")
 
-        # Use enhanced error handling by default
-        data["use_recovery"] = True
         result = hexstrike_client.safe_post("api/tools/nmap", data)
 
         if result.get("success"):
@@ -1405,77 +1425,95 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
     # ============================================================================
 
     @mcp.tool()
-    def rustscan_fast_scan(target: str, ports: str = "", ulimit: int = 5000,
-                          batch_size: int = 4500, timeout: int = 1500,
-                          scripts: bool = False, additional_args: str = "") -> Dict[str, Any]:
+    @mcp.tool()
+    def rustscan_fast_scan(
+        target: str,
+        port_scope: str = "top_1000",
+        custom_ports: str = "",
+        intensity: str = "balanced",
+        enable_nmap_scripts: bool = False,
+        use_recovery: bool = True
+    ) -> Dict[str, Any]:
         """
-        Execute Rustscan for ultra-fast port scanning with enhanced logging.
+        Execute an ultra-fast port scan using Rustscan.
+        
+        Rustscan is specialized for quickly finding open ports across large ranges. Use this when speed is a priority.
 
         Args:
-            target: The target IP address or hostname
-            ports: Specific ports to scan (e.g., "22,80,443")
-            ulimit: File descriptor limit
-            batch_size: Batch size for scanning
-            timeout: Timeout in milliseconds
-            scripts: Run Nmap scripts on discovered ports
-            additional_args: Additional Rustscan arguments
-
-        Returns:
-            Ultra-fast port scanning results
+            target: The IP address or hostname to scan.
+            port_scope: The range of ports to target:
+                - 'top_1000': Scans the most common 1000 ports.
+                - 'all': Scans all 65535 ports (extremely fast compared to Nmap).
+                - 'custom': Uses the specific ports defined in 'custom_ports'.
+            custom_ports: Comma-separated list of ports (only used if port_scope='custom').
+            intensity: The resource intensity policy:
+                - 'stealth': Lower batch size, higher timeout (lower impact).
+                - 'balanced': Default speed and concurrency.
+                - 'high_performance': Maximum file descriptors and batch size (highest speed).
+            enable_nmap_scripts: If True, automatically pipes discovered ports to Nmap for script scanning.
+            use_recovery: Whether to use intelligent error handling and retries.
         """
         data = {
             "target": target,
-            "ports": ports,
-            "ulimit": ulimit,
-            "batch_size": batch_size,
-            "timeout": timeout,
-            "scripts": scripts,
-            "additional_args": additional_args
+            "port_scope": port_scope,
+            "custom_ports": custom_ports,
+            "intensity": intensity,
+            "enable_nmap_scripts": enable_nmap_scripts,
+            "use_recovery": use_recovery
         }
-        logger.info(f"⚡ Starting Rustscan: {target}")
+        logger.info(f"{HexStrikeColors.FIRE_RED}⚡ Initiating {intensity} Rustscan: {target} (Scope: {port_scope}){HexStrikeColors.RESET}")
+        
         result = hexstrike_client.safe_post("api/tools/rustscan", data)
-        if result.get("success"):
-            logger.info(f"✅ Rustscan completed for {target}")
+        
+        if result.get("status") == "success":
+            logger.info(f"{HexStrikeColors.SUCCESS}✅ Rustscan completed successfully for {target}{HexStrikeColors.RESET}")
         else:
-            logger.error(f"❌ Rustscan failed for {target}")
+            logger.error(f"{HexStrikeColors.ERROR}❌ Rustscan failed for {target}{HexStrikeColors.RESET}")
+            
         return result
 
     @mcp.tool()
-    def masscan_high_speed(target: str, ports: str = "1-65535", rate: int = 1000,
-                          interface: str = "", router_mac: str = "", source_ip: str = "",
-                          banners: bool = False, additional_args: str = "") -> Dict[str, Any]:
+    def masscan_high_speed(
+        target: str,
+        port_scope: str = "top_1000",
+        custom_ports: str = "1-65535",
+        intensity: str = "normal",
+        use_recovery: bool = True
+    ) -> Dict[str, Any]:
         """
-        Execute Masscan for high-speed Internet-scale port scanning with intelligent rate limiting.
+        Execute a high-speed, Internet-scale port scan using Masscan.
+        
+        Masscan is designed for massive IP ranges or deep scans of single IPs at very high rates.
 
         Args:
-            target: The target IP address or CIDR range
-            ports: Port range to scan
-            rate: Packets per second rate
-            interface: Network interface to use
-            router_mac: Router MAC address
-            source_ip: Source IP address
-            banners: Enable banner grabbing
-            additional_args: Additional Masscan arguments
-
-        Returns:
-            High-speed port scanning results with intelligent rate limiting
+            target: The target IP address or CIDR range.
+            port_scope: The range of ports to target:
+                - 'top_1000': Scans the most common 1000 ports.
+                - 'all': Scans all 65535 ports.
+                - 'custom': Uses the specific ports defined in 'custom_ports'.
+            custom_ports: The port string (e.g., '1-65535', '80,443') used if port_scope='custom'.
+            intensity: The packet transmission rate policy:
+                - 'low': ~100 packets per second (Polite).
+                - 'normal': ~1000 packets per second (Standard).
+                - 'high': ~10000+ packets per second (Maximum throughput).
+            use_recovery: Whether to use intelligent error handling and retries.
         """
         data = {
             "target": target,
-            "ports": ports,
-            "rate": rate,
-            "interface": interface,
-            "router_mac": router_mac,
-            "source_ip": source_ip,
-            "banners": banners,
-            "additional_args": additional_args
+            "port_scope": port_scope,
+            "custom_ports": custom_ports,
+            "intensity": intensity,
+            "use_recovery": use_recovery
         }
-        logger.info(f"🚀 Starting Masscan: {target} at rate {rate}")
+        logger.info(f"{HexStrikeColors.FIRE_RED}🚀 Initiating {intensity} Masscan: {target} (Scope: {port_scope}){HexStrikeColors.RESET}")
+        
         result = hexstrike_client.safe_post("api/tools/masscan", data)
-        if result.get("success"):
-            logger.info(f"✅ Masscan completed for {target}")
+        
+        if result.get("status") == "success":
+            logger.info(f"{HexStrikeColors.SUCCESS}✅ Masscan completed successfully for {target}{HexStrikeColors.RESET}")
         else:
-            logger.error(f"❌ Masscan failed for {target}")
+            logger.error(f"{HexStrikeColors.ERROR}❌ Masscan failed for {target}{HexStrikeColors.RESET}")
+            
         return result
 
     @mcp.tool()

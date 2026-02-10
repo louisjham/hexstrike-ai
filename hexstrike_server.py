@@ -6662,7 +6662,13 @@ def setup_logging():
 # Configuration (using existing API_PORT from top of file)
 DEBUG_MODE = os.environ.get("DEBUG_MODE", "0").lower() in ("1", "true", "yes", "y")
 COMMAND_TIMEOUT = 300  # 5 minutes default timeout
-CACHE_SIZE = 1000
+
+# Structured progress event types
+EVENT_STARTED = "started"
+EVENT_STAGE_STARTED = "stage_started"
+EVENT_HEARTBEAT = "heartbeat"
+EVENT_COMPLETED = "completed"
+
 CACHE_TTL = 3600  # 1 hour
 
 class HexStrikeCache:
@@ -6783,9 +6789,15 @@ telemetry = TelemetryCollector()
 class EnhancedCommandExecutor:
     """Enhanced command executor with caching, progress tracking, and better output handling"""
 
-    def __init__(self, command: str, timeout: int = COMMAND_TIMEOUT):
+    def __init__(self, command: str, timeout: int = COMMAND_TIMEOUT, tool_name: str = ""):
         self.command = command
         self.timeout = timeout
+        self.tool_name = tool_name.lower()
+        self.is_nmap = "nmap" in command.lower() or self.tool_name == "nmap"
+        self.is_masscan = "masscan" in command.lower() or self.tool_name == "masscan"
+        self.is_rustscan = "rustscan" in command.lower() or self.tool_name == "rustscan"
+        self.current_stage = None
+        self.last_heartbeat_time = time.time()
         self.process = None
         self.stdout_data = ""
         self.stderr_data = ""
@@ -6796,14 +6808,82 @@ class EnhancedCommandExecutor:
         self.start_time = None
         self.end_time = None
 
+    def _emit_event(self, event_type: str, metadata: Dict[str, Any] = None):
+        """Emit a structured progress event to the log"""
+        event = {
+            "event": event_type,
+            "tool": self.tool_name or "shell",
+            "timestamp": datetime.now().isoformat(),
+            "metadata": metadata or {}
+        }
+        # Log as structured JSON for easy parsing by AI/Agents
+        logger.info(f"📊 [EVENT] {json.dumps(event)}")
+
+    def _parse_nmap_line(self, line: str):
+        """Parse Nmap output to identify stages and emit events"""
+        line = line.strip()
+        
+        # Identify stages
+        stage_map = {
+            "Initiating Ping Scan": "host discovery",
+            "Initiating ARP Ping Scan": "host discovery",
+            "Initiating Parallel DNS resolution": "host discovery",
+            "Initiating SYN Stealth Scan": "port scan",
+            "Initiating Connect Scan": "port scan",
+            "Initiating Service Scan": "service detection",
+            "Initiating NSE": "script scanning"
+        }
+        
+        for key, stage in stage_map.items():
+            if key in line and self.current_stage != stage:
+                self.current_stage = stage
+                self._emit_event(EVENT_STAGE_STARTED, {"stage": stage, "details": line})
+                return
+
+    def _parse_masscan_line(self, line: str):
+        """Parse Masscan output for progress and stages"""
+        line = line.strip()
+        
+        if "rate:" in line and "done" in line:
+            # rate: 100.00-kpps, 15.20% done, waiting 0-secs
+            try:
+                parts = line.split(',')
+                rate = parts[0].split(':')[1].strip()
+                done = parts[1].split('%')[0].strip()
+                self._emit_event(EVENT_HEARTBEAT, {
+                    "rate": rate,
+                    "progress_percent": float(done)
+                })
+            except:
+                pass
+        elif "Starting masscan" in line:
+            self._emit_event(EVENT_STAGE_STARTED, {"stage": "initialization"})
+
+    def _parse_rustscan_line(self, line: str):
+        """Parse Rustscan output for stages"""
+        line = line.strip()
+        if "Scanning" in line:
+            self.current_stage = "port scanning"
+            self._emit_event(EVENT_STAGE_STARTED, {"stage": "port scanning", "target": line.split()[-1]})
+        elif "Piping to nmap" in line:
+            self.current_stage = "service discovery"
+            self._emit_event(EVENT_STAGE_STARTED, {"stage": "service discovery nmap"})
+
     def _read_stdout(self):
         """Thread function to continuously read and display stdout"""
         try:
             for line in iter(self.process.stdout.readline, ''):
                 if line:
                     self.stdout_data += line
-                    # Real-time output display
-                    logger.info(f"📤 STDOUT: {line.strip()}")
+                    if self.is_nmap:
+                        self._parse_nmap_line(line)
+                    elif self.is_masscan:
+                        self._parse_masscan_line(line)
+                    elif self.is_rustscan:
+                        self._parse_rustscan_line(line)
+                    else:
+                        # Only log raw stdout for generic tools
+                        logger.info(f"📤 STDOUT: {line.strip()}")
         except Exception as e:
             logger.error(f"Error reading stdout: {e}")
 
@@ -6859,6 +6939,16 @@ class EnhancedCommandExecutor:
                     speed=speed
                 )
 
+                # Periodic heartbeat (every 8 seconds)
+                now = time.time()
+                if now - self.last_heartbeat_time > 8:
+                    self.last_heartbeat_time = now
+                    self._emit_event(EVENT_HEARTBEAT, {
+                        "elapsed_sec": round(elapsed, 1),
+                        "progress_percent": round(progress_percent, 1),
+                        "eta_sec": round(eta, 1)
+                    })
+
                 logger.info(f"{progress_bar} | {elapsed:.1f}s | PID: {self.process.pid}")
                 time.sleep(0.8)
                 i += 1
@@ -6868,6 +6958,7 @@ class EnhancedCommandExecutor:
     def execute(self) -> Dict[str, Any]:
         """Execute the command with enhanced monitoring and output"""
         self.start_time = time.time()
+        self._emit_event(EVENT_STARTED, {"command": self.command, "timeout": self.timeout})
 
         logger.info(f"🚀 EXECUTING: {self.command}")
         logger.info(f"⏱️  TIMEOUT: {self.timeout}s | PID: Starting...")
@@ -6972,6 +7063,14 @@ class EnhancedCommandExecutor:
                 if line.strip():
                     logger.info(line)
 
+            execution_time = self.end_time - self.start_time if self.end_time else 0
+            self._emit_event(EVENT_COMPLETED, {
+                "success": success,
+                "exit_code": self.return_code,
+                "duration_sec": round(execution_time, 2),
+                "timed_out": self.timed_out
+            })
+
             return {
                 "stdout": self.stdout_data,
                 "stderr": self.stderr_data,
@@ -6979,7 +7078,7 @@ class EnhancedCommandExecutor:
                 "success": success,
                 "timed_out": self.timed_out,
                 "partial_results": self.timed_out and (self.stdout_data or self.stderr_data),
-                "execution_time": self.end_time - self.start_time if self.end_time else 0,
+                "execution_time": execution_time,
                 "timestamp": datetime.now().isoformat()
             }
 
@@ -8633,7 +8732,7 @@ cve_intelligence = CVEIntelligenceManager()
 exploit_generator = AIExploitGenerator()
 vulnerability_correlator = VulnerabilityCorrelator()
 
-def execute_command(command: str, use_cache: bool = True) -> Dict[str, Any]:
+def execute_command(command: str, use_cache: bool = True, tool_name: str = "") -> Dict[str, Any]:
     """
     Execute a shell command with enhanced features
 
@@ -8652,7 +8751,7 @@ def execute_command(command: str, use_cache: bool = True) -> Dict[str, Any]:
             return cached_result
 
     # Execute command
-    executor = EnhancedCommandExecutor(command)
+    executor = EnhancedCommandExecutor(command, tool_name=tool_name)
     result = executor.execute()
 
     # Cache successful results
@@ -8688,7 +8787,7 @@ def execute_command_with_recovery(tool_name: str, command: str, parameters: Dict
 
         try:
             # Execute the command
-            result = execute_command(command, use_cache)
+            result = execute_command(command, use_cache, tool_name=tool_name)
 
             # Check if execution was successful
             if result.get("success", False):
@@ -10324,54 +10423,353 @@ def create_comprehensive_bugbounty_assessment():
 # SECURITY TOOLS API ENDPOINTS
 # ============================================================================
 
+# Constants for Nmap intent mapping
+NMAP_PROFILE_FLAGS = {
+    "host_discovery": "-sn",
+    "service_discovery": "-sV",
+    "default_scripts": "-sC",
+    "full_tcp": "-sS -sV",
+    "aggressive": "-A"
+}
+
+NMAP_TIMING_FLAGS = {
+    "slow": "-T2",
+    "normal": "-T3",
+    "fast": "-T4"
+}
+
+# Masscan Constants and Helpers
+MASSCAN_INTENSITY_RATES = {
+    "low": 100,
+    "normal": 1000,
+    "high": 10000
+}
+
+def build_masscan_command(params: Dict[str, Any]) -> str:
+    target = params.get("target", "")
+    port_scope = params.get("port_scope", "top_1000")
+    custom_ports = params.get("custom_ports", "")
+    intensity = params.get("intensity", "normal")
+    
+    if not target:
+        raise ValueError("Target parameter is required")
+        
+    rate = MASSCAN_INTENSITY_RATES.get(intensity, 1000)
+    
+    # Port selection for Masscan
+    ports = "1-1000" if port_scope == "top_1000" else "1-65535"
+    if port_scope == "custom":
+        if not custom_ports:
+            raise ValueError("custom_ports required for custom port_scope")
+        ports = custom_ports
+        
+    return f"masscan {target} -p{ports} --rate={rate}"
+
+def parse_masscan_output(stdout: str) -> Dict[str, Any]:
+    """Parse Masscan output: Discovered on 127.0.0.1 port 80/tcp"""
+    open_ports = []
+    pattern = re.compile(r'Discovered on (\S+) port (\d+)/(tcp|udp)')
+    for line in stdout.splitlines():
+        match = pattern.search(line)
+        if match:
+            _, port, proto = match.groups()
+            open_ports.append({
+                "port": int(port),
+                "protocol": proto,
+                "service": "unknown",
+                "version": "unknown"
+            })
+    return {"host_up": len(open_ports) > 0, "open_ports": open_ports}
+
+def get_masscan_metadata(intensity: str) -> Dict[str, Any]:
+    cost_map = {"low": "low", "normal": "medium", "high": "high"}
+    aggr_map = {"low": "low", "normal": "medium", "high": "high"}
+    return {
+        "execution_cost": cost_map.get(intensity, "medium"),
+        "aggressiveness": aggr_map.get(intensity, "medium"),
+        "data_source": "masscan",
+        "confidence": 0.75
+    }
+
+# Rustscan Constants and Helpers
+RUSTSCAN_INTENSITY_CONFIGS = {
+    "stealth": {"ulimit": 2000, "batch_size": 1000, "timeout": 3000},
+    "balanced": {"ulimit": 5000, "batch_size": 4500, "timeout": 1500},
+    "high_performance": {"ulimit": 10000, "batch_size": 8000, "timeout": 1000}
+}
+
+def build_rustscan_command(params: Dict[str, Any]) -> str:
+    target = params.get("target", "")
+    port_scope = params.get("port_scope", "top_1000")
+    custom_ports = params.get("custom_ports", "")
+    intensity = params.get("intensity", "balanced")
+    enable_nmap_scripts = params.get("enable_nmap_scripts", False)
+    
+    if not target:
+        raise ValueError("Target parameter is required")
+        
+    config = RUSTSCAN_INTENSITY_CONFIGS.get(intensity, RUSTSCAN_INTENSITY_CONFIGS["balanced"])
+    
+    command = f"rustscan -a {target} --ulimit {config['ulimit']} -b {config['batch_size']} -t {config['timeout']}"
+    
+    if port_scope == "all":
+        command += " --range 1-65535"
+    elif port_scope == "custom" and custom_ports:
+        command += f" -p {custom_ports}"
+        
+    if enable_nmap_scripts:
+        command += " -- -sC -sV"
+        
+    return command
+
+def parse_rustscan_output(stdout: str) -> Dict[str, Any]:
+    """Parse Rustscan output or Nmap piped output"""
+    if "Piping to nmap" in stdout:
+        return parse_nmap_output(stdout)
+    
+    open_ports = []
+    # Open 127.0.0.1:80
+    pattern = re.compile(r'[Oo]pen (\S+):(\d+)')
+    for line in stdout.splitlines():
+        match = pattern.search(line)
+        if match:
+            _, port = match.groups()
+            open_ports.append({
+                "port": int(port),
+                "protocol": "tcp",
+                "service": "unknown",
+                "version": "unknown"
+            })
+    return {"host_up": len(open_ports) > 0, "open_ports": open_ports}
+
+def get_rustscan_metadata(intensity: str) -> Dict[str, Any]:
+    cost_map = {"stealth": "low", "balanced": "medium", "high_performance": "high"}
+    aggr_map = {"stealth": "low", "balanced": "medium", "high_performance": "high"}
+    return {
+        "execution_cost": cost_map.get(intensity, "medium"),
+        "aggressiveness": aggr_map.get(intensity, "medium"),
+        "data_source": "rustscan",
+        "confidence": 0.85
+    }
+
+def validate_nmap_params(params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    Validate Nmap parameters before command construction.
+    Returns a structured error dictionary if validation fails, else None.
+    """
+    profile = params.get("scan_profile", "service_discovery")
+    port_scope = params.get("port_scope", "default")
+    custom_ports = params.get("custom_ports", "")
+
+    # Check 1: custom_ports must be non-empty for custom scope
+    if port_scope == "custom" and not custom_ports:
+        return {
+            "status": "error",
+            "error_type": "invalid_input",
+            "message": "custom_ports must be provided when port_scope is set to 'custom'",
+            "retryable": False
+        }
+
+    # Check 2: host_discovery is incompatible with port scanning
+    if profile == "host_discovery" and port_scope != "default":
+        return {
+            "status": "error",
+            "error_type": "invalid_input",
+            "message": "scan_profile 'host_discovery' (-sn) is incompatible with port_scope settings. Host discovery does not perform port scanning.",
+            "retryable": False
+        }
+
+    return None
+
+def build_nmap_command(params: Dict[str, Any]) -> str:
+    """
+    Build a safe, validated Nmap command from intent-level parameters.
+    No raw user-provided flags are allowed here.
+    """
+    target = params.get("target", "")
+    profile = params.get("scan_profile", "service_discovery")
+    port_scope = params.get("port_scope", "default")
+    custom_ports = params.get("custom_ports", "")
+    timing = params.get("timing", "normal")
+
+    if not target:
+        raise ValueError("Target parameter is required")
+
+    # Validate enums (extra safety check in addition to route validation)
+    if profile not in NMAP_PROFILE_FLAGS:
+        raise ValueError(f"Invalid scan_profile: {profile}")
+    if timing not in NMAP_TIMING_FLAGS:
+        raise ValueError(f"Invalid timing: {timing}")
+
+    # Base flags
+    flags = [NMAP_PROFILE_FLAGS[profile], NMAP_TIMING_FLAGS[timing], "-Pn"]
+
+    # Port selection logic
+    if port_scope == "top_1000":
+        flags.append("--top-ports 1000")
+    elif port_scope == "all":
+        flags.append("-p-")
+    elif port_scope == "custom":
+        # Strict validation for custom port strings
+        if not re.match(r'^[0-9,\-]+$', custom_ports):
+             raise ValueError("custom_ports contains invalid characters")
+        flags.append(f"-p {custom_ports}")
+    elif port_scope != "default":
+        raise ValueError(f"Invalid port_scope: {port_scope}")
+
+    return f"nmap {' '.join(flags)} {target}"
+
+def parse_nmap_output(stdout: str) -> Dict[str, Any]:
+    """
+    Parse raw Nmap stdout into a structured summary of ports and host status.
+    """
+    open_ports = []
+    host_up = False
+
+    # Regex for matching port lines: 80/tcp open http [Version]
+    # Patterns:
+    # 80/tcp   open  http    Apache httpd 2.4.41
+    # 443/tcp  open  ssl/http
+    port_pattern = re.compile(r'^(\d+)/(tcp|udp)\s+open\s+(\S+)\s*(.*)$')
+
+    for line in stdout.splitlines():
+        line = line.strip()
+
+        if "Host is up" in line:
+            host_up = True
+            continue
+
+        match = port_pattern.match(line)
+        if match:
+            port, protocol, service, version = match.groups()
+            open_ports.append({
+                "port": int(port),
+                "protocol": protocol,
+                "service": service,
+                "version": version.strip() if version else "unknown"
+            })
+
+    # If it's a host discovery scan and we see "Host is up", but no ports, it's still success
+    return {
+        "host_up": host_up or (len(open_ports) > 0),
+        "open_ports": open_ports
+    }
+
+def get_nmap_metadata(profile: str, timing: str) -> Dict[str, Any]:
+    """
+    Derive model-facing metadata from scan profile and timing.
+    """
+    # Mapping for aggressiveness
+    aggressiveness_map = {
+        "host_discovery": "low",
+        "service_discovery": "low",
+        "default_scripts": "medium",
+        "full_tcp": "medium",
+        "aggressive": "high"
+    }
+    
+    # Timing boosts aggressiveness if set to fast
+    base_aggr = aggressiveness_map.get(profile, "medium")
+    if timing == "fast":
+        base_aggr = "high" if base_aggr == "medium" else base_aggr
+        
+    # Mapping for execution cost
+    cost_map = {
+        "host_discovery": "low",
+        "service_discovery": "medium",
+        "default_scripts": "medium",
+        "full_tcp": "high",
+        "aggressive": "high"
+    }
+    
+    # Confidence scoring logic
+    confidence_map = {
+        "host_discovery": 0.7,
+        "service_discovery": 0.85,
+        "default_scripts": 0.9,
+        "full_tcp": 0.95,
+        "aggressive": 0.98
+    }
+    
+    return {
+        "execution_cost": cost_map.get(profile, "medium"),
+        "aggressiveness": base_aggr,
+        "data_source": "nmap",
+        "confidence": confidence_map.get(profile, 0.8)
+    }
+
 @app.route("/api/tools/nmap", methods=["POST"])
 def nmap():
-    """Execute nmap scan with enhanced logging, caching, and intelligent error handling"""
+    """Execute nmap scan and return a structured summary with AI metadata"""
     try:
         params = request.json
-        target = params.get("target", "")
-        scan_type = params.get("scan_type", "-sCV")
-        ports = params.get("ports", "")
-        additional_args = params.get("additional_args", "-T4 -Pn")
         use_recovery = params.get("use_recovery", True)
+        target = params.get("target", "")
+        profile = params.get("scan_profile", "service_discovery")
+        timing = params.get("timing", "normal")
 
-        if not target:
-            logger.warning("🎯 Nmap called without target parameter")
+        # 1. Structured validation
+        validation_error = validate_nmap_params(params)
+        if validation_error:
+            logger.warning(f"⚠️ Validation failed for Nmap request: {validation_error['message']}")
+            return jsonify(validation_error), 400
+
+        # 2. Command construction
+        try:
+            command = build_nmap_command(params)
+        except ValueError as e:
+            logger.warning(f"⚠️ Command building failed for Nmap: {str(e)}")
             return jsonify({
-                "error": "Target parameter is required"
+                "status": "error",
+                "error_type": "invalid_input",
+                "message": str(e),
+                "retryable": False
             }), 400
-
-        command = f"nmap {scan_type}"
-
-        if ports:
-            command += f" -p {ports}"
-
-        if additional_args:
-            command += f" {additional_args}"
-
-        command += f" {target}"
 
         logger.info(f"🔍 Starting Nmap scan: {target}")
 
-        # Use intelligent error handling if enabled
+        # 3. Execution
         if use_recovery:
-            tool_params = {
-                "target": target,
-                "scan_type": scan_type,
-                "ports": ports,
-                "additional_args": additional_args
-            }
-            result = execute_command_with_recovery("nmap", command, tool_params)
+            result = execute_command_with_recovery("nmap", command, params)
         else:
-            result = execute_command(command)
+            result = execute_command(command, tool_name="nmap")
 
-        logger.info(f"📊 Nmap scan completed for {target}")
-        return jsonify(result)
+        # 4. Result Transformation
+        stdout = result.get("stdout", "")
+        stderr = result.get("stderr", "")
+        parsed_data = parse_nmap_output(stdout)
+
+        warning_count = stdout.lower().count("warning") + stderr.lower().count("warning")
+        error_count = stdout.lower().count("error") + stderr.lower().count("error")
+
+        # 5. Metadata derivation
+        ai_metadata = get_nmap_metadata(profile, timing)
+
+        summary = {
+            "status": "success" if result.get("success") else "error",
+            "scan_profile": profile,
+            "target": target,
+            "host_up": parsed_data["host_up"],
+            "open_ports": parsed_data["open_ports"],
+            "warnings": warning_count,
+            "errors": error_count,
+            "duration_sec": round(result.get("execution_time", 0), 2)
+        }
+        
+        # Merge AI metadata into response
+        summary.update(ai_metadata)
+
+        logger.info(f"📊 Nmap structured summary generated for {target} (Cost: {ai_metadata['execution_cost']})")
+
+        return jsonify(summary)
 
     except Exception as e:
         logger.error(f"💥 Error in nmap endpoint: {str(e)}")
         return jsonify({
-            "error": f"Server error: {str(e)}"
+            "status": "error",
+            "error_type": "server_error",
+            "message": f"An internal server error occurred: {str(e)}",
+            "retryable": True
         }), 500
 
 @app.route("/api/tools/gobuster", methods=["POST"])
@@ -11488,82 +11886,111 @@ def smbmap():
 
 @app.route("/api/tools/rustscan", methods=["POST"])
 def rustscan():
-    """Execute Rustscan for ultra-fast port scanning with enhanced logging"""
+    """Execute Rustscan and return a structured summary with AI metadata"""
     try:
         params = request.json
+        use_recovery = params.get("use_recovery", True)
         target = params.get("target", "")
-        ports = params.get("ports", "")
-        ulimit = params.get("ulimit", 5000)
-        batch_size = params.get("batch_size", 4500)
-        timeout = params.get("timeout", 1500)
-        scripts = params.get("scripts", "")
-        additional_args = params.get("additional_args", "")
+        port_scope = params.get("port_scope", "top_1000")
+        intensity = params.get("intensity", "balanced")
 
-        if not target:
-            logger.warning("🎯 Rustscan called without target parameter")
-            return jsonify({"error": "Target parameter is required"}), 400
-
-        command = f"rustscan -a {target} --ulimit {ulimit} -b {batch_size} -t {timeout}"
-
-        if ports:
-            command += f" -p {ports}"
-
-        if scripts:
-            command += f" -- -sC -sV"
-
-        if additional_args:
-            command += f" {additional_args}"
+        # 1. Command construction
+        try:
+            command = build_rustscan_command(params)
+        except ValueError as e:
+            return jsonify({
+                "status": "error",
+                "error_type": "invalid_input",
+                "message": str(e),
+                "retryable": False
+            }), 400
 
         logger.info(f"⚡ Starting Rustscan: {target}")
-        result = execute_command(command)
-        logger.info(f"📊 Rustscan completed for {target}")
-        return jsonify(result)
+
+        # 2. Execution
+        if use_recovery:
+            result = execute_command_with_recovery("rustscan", command, params)
+        else:
+            result = execute_command(command, tool_name="rustscan")
+
+        # 3. Result Transformation
+        stdout = result.get("stdout", "")
+        parsed_data = parse_rustscan_output(stdout)
+        ai_metadata = get_rustscan_metadata(intensity)
+
+        summary = {
+            "status": "success" if result.get("success") else "error",
+            "intensity": intensity,
+            "target": target,
+            "host_up": parsed_data["host_up"],
+            "open_ports": parsed_data["open_ports"],
+            "duration_sec": round(result.get("execution_time", 0), 2)
+        }
+        summary.update(ai_metadata)
+
+        return jsonify(summary)
     except Exception as e:
         logger.error(f"💥 Error in rustscan endpoint: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
+        return jsonify({
+            "status": "error",
+            "error_type": "server_error",
+            "message": str(e),
+            "retryable": True
+        }), 500
 
 @app.route("/api/tools/masscan", methods=["POST"])
 def masscan():
-    """Execute Masscan for high-speed Internet-scale port scanning with intelligent rate limiting"""
+    """Execute Masscan and return a structured summary with AI metadata"""
     try:
         params = request.json
+        use_recovery = params.get("use_recovery", True)
         target = params.get("target", "")
-        ports = params.get("ports", "1-65535")
-        rate = params.get("rate", 1000)
-        interface = params.get("interface", "")
-        router_mac = params.get("router_mac", "")
-        source_ip = params.get("source_ip", "")
-        banners = params.get("banners", False)
-        additional_args = params.get("additional_args", "")
+        port_scope = params.get("port_scope", "top_1000")
+        intensity = params.get("intensity", "normal")
 
-        if not target:
-            logger.warning("🎯 Masscan called without target parameter")
-            return jsonify({"error": "Target parameter is required"}), 400
+        # 1. Command construction
+        try:
+            command = build_masscan_command(params)
+        except ValueError as e:
+            return jsonify({
+                "status": "error",
+                "error_type": "invalid_input",
+                "message": str(e),
+                "retryable": False
+            }), 400
 
-        command = f"masscan {target} -p{ports} --rate={rate}"
+        logger.info(f"🚀 Starting Masscan: {target}")
 
-        if interface:
-            command += f" -e {interface}"
+        # 2. Execution
+        if use_recovery:
+            result = execute_command_with_recovery("masscan", command, params)
+        else:
+            result = execute_command(command, tool_name="masscan")
 
-        if router_mac:
-            command += f" --router-mac {router_mac}"
+        # 3. Result Transformation
+        stdout = result.get("stdout", "")
+        parsed_data = parse_masscan_output(stdout)
+        ai_metadata = get_masscan_metadata(intensity)
 
-        if source_ip:
-            command += f" --source-ip {source_ip}"
+        summary = {
+            "status": "success" if result.get("success") else "error",
+            "intensity": intensity,
+            "target": target,
+            "host_up": parsed_data["host_up"],
+            "open_ports": parsed_data["open_ports"],
+            "duration_sec": round(result.get("execution_time", 0), 2)
+        }
+        summary.update(ai_metadata)
 
-        if banners:
-            command += " --banners"
-
-        if additional_args:
-            command += f" {additional_args}"
-
-        logger.info(f"🚀 Starting Masscan: {target} at rate {rate}")
-        result = execute_command(command)
-        logger.info(f"📊 Masscan completed for {target}")
-        return jsonify(result)
+        return jsonify(summary)
     except Exception as e:
         logger.error(f"💥 Error in masscan endpoint: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
+        return jsonify({
+            "status": "error",
+            "error_type": "server_error",
+            "message": str(e),
+            "retryable": True
+        }), 500
 
 @app.route("/api/tools/nmap-advanced", methods=["POST"])
 def nmap_advanced():
