@@ -98,6 +98,10 @@ app.config['JSON_SORT_KEYS'] = False
 API_PORT = int(os.environ.get('HEXSTRIKE_PORT', 8888))
 API_HOST = os.environ.get('HEXSTRIKE_HOST', '127.0.0.1')
 
+# Cache Configuration
+CACHE_SIZE = 1000
+CACHE_TTL = 3600
+
 # ============================================================================
 # MODERN VISUAL ENGINE (v2.0 ENHANCEMENT)
 # ============================================================================
@@ -205,9 +209,9 @@ class ModernVisualEngine:
     def create_progress_bar(current: int, total: int, width: int = 50, tool: str = "") -> str:
         """Create a beautiful progress bar with cyberpunk styling"""
         if total == 0:
-            percentage = 0
+            percentage = 0.0
         else:
-            percentage = min(100, (current / total) * 100)
+            percentage = min(100.0, (current / total) * 100.0)
 
         filled = int(width * percentage / 100)
         bar = '█' * filled + '░' * (width - filled)
@@ -666,7 +670,7 @@ class IntelligentDecisionEngine:
             }
         }
 
-    def _initialize_technology_signatures(self) -> Dict[str, Dict[str, List[str]]]:
+    def _initialize_technology_signatures(self) -> Dict[str, Dict[str, List[Any]]]:
         """Initialize technology detection signatures"""
         return {
             "headers": {
@@ -1000,7 +1004,7 @@ class IntelligentDecisionEngine:
 
         return selected_tools
 
-    def optimize_parameters(self, tool: str, profile: TargetProfile, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def optimize_parameters(self, tool: str, profile: TargetProfile, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Enhanced parameter optimization with advanced intelligence"""
         if context is None:
             context = {}
@@ -2151,7 +2155,7 @@ class IntelligentErrorHandler:
                 "cpu_percent": psutil.cpu_percent(),
                 "memory_percent": psutil.virtual_memory().percent,
                 "disk_percent": psutil.disk_usage('/').percent,
-                "load_average": os.getloadavg() if hasattr(os, 'getloadavg') else None,
+                "load_average": psutil.getloadavg() if hasattr(psutil, 'getloadavg') else (0.0, 0.0, 0.0),
                 "active_processes": len(psutil.pids())
             }
         except Exception:
@@ -5656,32 +5660,30 @@ class ProcessManager:
 
     @staticmethod
     def pause_process(pid):
-        """Pause a specific process (SIGSTOP)"""
+        """Pause a specific process using psutil"""
         with process_lock:
             if pid in active_processes:
                 try:
-                    process_obj = active_processes[pid]["process"]
-                    if process_obj and process_obj.poll() is None:
-                        os.kill(pid, signal.SIGSTOP)
-                        active_processes[pid]["status"] = "paused"
-                        logger.info(f"⏸️  PAUSED: Process {pid}")
-                        return True
+                    p = psutil.Process(pid)
+                    p.suspend()
+                    active_processes[pid]["status"] = "paused"
+                    logger.info(f"⏸️  PAUSED: Process {pid}")
+                    return True
                 except Exception as e:
                     logger.error(f"💥 Error pausing process {pid}: {str(e)}")
             return False
 
     @staticmethod
     def resume_process(pid):
-        """Resume a paused process (SIGCONT)"""
+        """Resume a paused process using psutil"""
         with process_lock:
             if pid in active_processes:
                 try:
-                    process_obj = active_processes[pid]["process"]
-                    if process_obj and process_obj.poll() is None:
-                        os.kill(pid, signal.SIGCONT)
-                        active_processes[pid]["status"] = "running"
-                        logger.info(f"▶️  RESUMED: Process {pid}")
-                        return True
+                    p = psutil.Process(pid)
+                    p.resume()
+                    active_processes[pid]["status"] = "running"
+                    logger.info(f"▶️  RESUMED: Process {pid}")
+                    return True
                 except Exception as e:
                     logger.error(f"💥 Error resuming process {pid}: {str(e)}")
             return False
@@ -6801,14 +6803,14 @@ class EnhancedCommandExecutor:
         self.process = None
         self.stdout_data = ""
         self.stderr_data = ""
-        self.stdout_thread = None
-        self.stderr_thread = None
-        self.return_code = None
+        self.stdout_thread: Optional[threading.Thread] = None
+        self.stderr_thread: Optional[threading.Thread] = None
+        self.return_code: Optional[int] = None
         self.timed_out = False
-        self.start_time = None
-        self.end_time = None
+        self.start_time: Optional[float] = None
+        self.end_time: Optional[float] = None
 
-    def _emit_event(self, event_type: str, metadata: Dict[str, Any] = None):
+    def _emit_event(self, event_type: str, metadata: Optional[Dict[str, Any]] = None):
         """Emit a structured progress event to the log"""
         event = {
             "event": event_type,
@@ -6871,6 +6873,9 @@ class EnhancedCommandExecutor:
 
     def _read_stdout(self):
         """Thread function to continuously read and display stdout"""
+        if self.process is None or self.process.stdout is None:
+            return
+            
         try:
             for line in iter(self.process.stdout.readline, ''):
                 if line:
@@ -6889,6 +6894,9 @@ class EnhancedCommandExecutor:
 
     def _read_stderr(self):
         """Thread function to continuously read and display stderr"""
+        if self.process is None or self.process.stderr is None:
+            return
+            
         try:
             for line in iter(self.process.stderr.readline, ''):
                 if line:
@@ -10046,8 +10054,9 @@ def execute_httpx_scan(target, params):
     """Execute httpx scan with optimized parameters"""
     try:
         additional_args = params.get('additional_args', '-tech-detect -status-code')
+        binary = get_httpx_binary()
         # Use shell command with pipe for httpx
-        cmd = f"echo {target} | httpx {additional_args}"
+        cmd = f"echo {target} | {binary} {additional_args}"
 
         return execute_command(cmd)
     except Exception as e:
@@ -10550,6 +10559,105 @@ def get_rustscan_metadata(intensity: str) -> Dict[str, Any]:
         "aggressiveness": aggr_map.get(intensity, "medium"),
         "data_source": "rustscan",
         "confidence": 0.85
+    }
+
+# HTTPX Constants and Helpers
+_HTTPX_BINARY = None
+
+def get_httpx_binary() -> str:
+    """Identify if 'httpx' or 'httpx-toolkit' is installed and return the correct binary name."""
+    global _HTTPX_BINARY
+    if _HTTPX_BINARY:
+        return _HTTPX_BINARY
+    
+    if shutil.which("httpx"):
+        _HTTPX_BINARY = "httpx"
+    elif shutil.which("httpx-toolkit"):
+        _HTTPX_BINARY = "httpx-toolkit"
+    else:
+        # Fallback to httpx if neither is found
+        _HTTPX_BINARY = "httpx"
+    return _HTTPX_BINARY
+
+def build_httpx_command(params: Dict[str, Any]) -> str:
+    """Build a safe, validated httpx command using intent-level parameters."""
+    target = params.get("target", "")
+    threads = params.get("threads", 50)
+    probe = params.get("probe", True)
+    tech_detect = params.get("tech_detect", True)
+    status_code = params.get("status_code", True)
+    content_length = params.get("content_length", False)
+    title = params.get("title", True)
+    web_server = params.get("web_server", False)
+    follow_redirects = params.get("follow_redirects", False)
+    additional_args = params.get("additional_args", "")
+    
+    if not target:
+        raise ValueError("Target parameter is required")
+        
+    binary = get_httpx_binary()
+    
+    # Base command: use -u for single target or -l for list (detecting which one to use)
+    if os.path.exists(target):
+        command = f"{binary} -l {target} -t {threads}"
+    else:
+        command = f"{binary} -u {target} -t {threads}"
+    
+    if probe: command += " -probe"
+    if tech_detect: command += " -td"
+    if status_code: command += " -sc"
+    if content_length: command += " -cl"
+    if title: command += " -title"
+    if web_server: command += " -server"
+    if follow_redirects: command += " -fr"
+    
+    if additional_args:
+        command += f" {additional_args}"
+        
+    return command
+
+def parse_httpx_output(stdout: str) -> Dict[str, Any]:
+    """Parse httpx output into structured data summary."""
+    results = []
+    # Standard httpx output format often includes brackets for metadata
+    # Pattern to catch URL and optional status code, title, etc.
+    for line in stdout.splitlines():
+        line = line.strip()
+        if not line or line.startswith("["): continue # Skip headers/banners
+        
+        parts = line.split()
+        if not parts: continue
+        
+        url = parts[0]
+        finding: Dict[str, Any] = {"url": url}
+        
+        # Look for [200], [Example Title], etc.
+        metadata = re.findall(r'\[(.*?)\]', line)
+        if metadata:
+            for item in metadata:
+                if item.isdigit():
+                    finding["status_code"] = int(item)
+                elif "," in item: # Likely tech stack
+                    finding["technologies"] = [t.strip() for t in item.split(',')]
+                elif len(item) > 0:
+                    # Could be title or server name
+                    if "server" not in finding:
+                        finding["server"] = item
+                    else:
+                        finding["title"] = item
+        
+        results.append(finding)
+                
+    return {"results": results, "count": len(results)}
+
+def get_httpx_metadata(params: Dict[str, Any]) -> Dict[str, Any]:
+    threads = params.get("threads", 50)
+    execution_cost = "low" if threads <= 50 else "medium"
+    return {
+        "execution_cost": execution_cost,
+        "aggressiveness": "medium",
+        "data_source": "httpx",
+        "confidence": 0.9
     }
 
 def validate_nmap_params(params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -13561,53 +13669,54 @@ def dalfox():
 
 @app.route("/api/tools/httpx", methods=["POST"])
 def httpx():
-    """Execute httpx for fast HTTP probing and technology detection"""
+    """Execute httpx and return a structured summary with AI metadata"""
     try:
         params = request.json
+        use_recovery = params.get("use_recovery", True)
         target = params.get("target", "")
-        probe = params.get("probe", True)
-        tech_detect = params.get("tech_detect", False)
-        status_code = params.get("status_code", False)
-        content_length = params.get("content_length", False)
-        title = params.get("title", False)
-        web_server = params.get("web_server", False)
-        threads = params.get("threads", 50)
-        additional_args = params.get("additional_args", "")
 
-        if not target:
-            logger.warning("🌐 httpx called without target parameter")
-            return jsonify({"error": "Target parameter is required"}), 400
+        # 1. Command construction
+        try:
+            command = build_httpx_command(params)
+        except ValueError as e:
+            return jsonify({
+                "status": "error",
+                "error_type": "invalid_input",
+                "message": str(e),
+                "retryable": False
+            }), 400
 
-        command = f"httpx -l {target} -t {threads}"
+        logger.info(f"🌐 Starting httpx probe: {target}")
 
-        if probe:
-            command += " -probe"
+        # 2. Execution
+        if use_recovery:
+            result = execute_command_with_recovery("httpx", command, params)
+        else:
+            result = execute_command(command, tool_name="httpx")
 
-        if tech_detect:
-            command += " -tech-detect"
+        # 3. Result Transformation
+        stdout = result.get("stdout", "")
+        parsed_data = parse_httpx_output(stdout)
+        ai_metadata = get_httpx_metadata(params)
 
-        if status_code:
-            command += " -sc"
+        summary = {
+            "status": "success" if result.get("success") else "error",
+            "target": target,
+            "results": parsed_data["results"],
+            "count": parsed_data["count"],
+            "duration_sec": round(result.get("execution_time", 0), 2)
+        }
+        summary.update(ai_metadata)
 
-        if content_length:
-            command += " -cl"
-
-        if title:
-            command += " -title"
-
-        if web_server:
-            command += " -server"
-
-        if additional_args:
-            command += f" {additional_args}"
-
-        logger.info(f"🌍 Starting httpx probe: {target}")
-        result = execute_command(command)
-        logger.info(f"📊 httpx probe completed for {target}")
-        return jsonify(result)
+        return jsonify(summary)
     except Exception as e:
         logger.error(f"💥 Error in httpx endpoint: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
+        return jsonify({
+            "status": "error",
+            "error_type": "server_error",
+            "message": str(e),
+            "retryable": True
+        }), 500
 
 @app.route("/api/tools/anew", methods=["POST"])
 def anew():

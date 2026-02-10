@@ -357,7 +357,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         Returns:
             Scan results with enhanced telemetry
         """
-        data = {
+        data: Dict[str, Any] = {
             "url": url,
             "mode": mode,
             "wordlist": wordlist,
@@ -402,7 +402,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         Returns:
             Scan results with discovered vulnerabilities and telemetry
         """
-        data = {
+        data: Dict[str, Any] = {
             "target": target,
             "severity": severity,
             "tags": tags,
@@ -2711,44 +2711,53 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         return result
 
     @mcp.tool()
-    def httpx_probe(target: str, probe: bool = True, tech_detect: bool = False,
-                   status_code: bool = False, content_length: bool = False,
-                   title: bool = False, web_server: bool = False, threads: int = 50,
-                   additional_args: str = "") -> Dict[str, Any]:
+    def httpx_probe(
+        target: str,
+        probe_intensity: str = "balanced",
+        extract_metadata: bool = True,
+        follow_redirects: bool = False,
+        use_recovery: bool = True
+    ) -> Dict[str, Any]:
         """
-        Execute httpx for fast HTTP probing and technology detection.
+        Execute a high-speed HTTP probe using httpx (or httpx-toolkit).
+        
+        Use this tool to validate live web servers, detect technologies (CMS, Frameworks), 
+        and extract page titles/status codes from a list of URLs or a single domain.
 
         Args:
-            target: Target file or single URL
-            probe: Enable probing
-            tech_detect: Enable technology detection
-            status_code: Show status codes
-            content_length: Show content length
-            title: Show page titles
-            web_server: Show web server
-            threads: Number of threads
-            additional_args: Additional httpx arguments
-
-        Returns:
-            Fast HTTP probing results with technology detection
+            target: The URL, IP, or path to a file containing multiple targets.
+            probe_intensity: The speed and resource usage level:
+                - 'passive': Low thread count (20), minimal probes.
+                - 'balanced': Default performance (50 threads).
+                - 'aggressive': High-speed execution (150 threads) for massive target lists.
+            extract_metadata: If True, automatically collects technology stacks, status codes, and page titles.
+            follow_redirects: If True, follows HTTP redirects to reach the final destination.
+            use_recovery: Whether to use intelligent error handling and retries.
         """
+        threads = 50
+        if probe_intensity == "passive": threads = 20
+        elif probe_intensity == "aggressive": threads = 150
+        
         data = {
             "target": target,
-            "probe": probe,
-            "tech_detect": tech_detect,
-            "status_code": status_code,
-            "content_length": content_length,
-            "title": title,
-            "web_server": web_server,
             "threads": threads,
-            "additional_args": additional_args
+            "probe": True,
+            "tech_detect": extract_metadata,
+            "status_code": extract_metadata,
+            "title": extract_metadata,
+            "follow_redirects": follow_redirects,
+            "use_recovery": use_recovery
         }
-        logger.info(f"🌍 Starting httpx probe: {target}")
+        
+        logger.info(f"{HexStrikeColors.FIRE_RED}🌐 Initiating {probe_intensity} HTTPX probe: {target}{HexStrikeColors.RESET}")
+        
         result = hexstrike_client.safe_post("api/tools/httpx", data)
-        if result.get("success"):
-            logger.info(f"✅ httpx probe completed for {target}")
+        
+        if result.get("status") == "success":
+            logger.info(f"{HexStrikeColors.SUCCESS}✅ HTTPX probe completed successfully for {target} ({result.get('count', 0)} results){HexStrikeColors.RESET}")
         else:
-            logger.error(f"❌ httpx probe failed for {target}")
+            logger.error(f"{HexStrikeColors.ERROR}❌ HTTPX probe failed for {target}{HexStrikeColors.RESET}")
+            
         return result
 
     @mcp.tool()
@@ -2945,7 +2954,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
             logger.info(f"🤖 Generating {attack_type} payloads...")
 
             # Generate payloads for this attack type
-            payload_result = self.ai_generate_payload(attack_type, "advanced", "", target_url)
+            payload_result = ai_generate_payload(attack_type, "advanced", "", target_url)
 
             if payload_result.get("success"):
                 payload_data = payload_result.get("ai_payload_generation", {})
@@ -3164,7 +3173,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
 
         # 1. API Endpoint Fuzzing
         logger.info("🔍 Phase 1: API endpoint discovery and fuzzing")
-        fuzz_result = self.api_fuzzer(base_url)
+        fuzz_result = api_fuzzer(base_url)
         if fuzz_result.get("success"):
             audit_results["tests_performed"].append("api_fuzzing")
             audit_results["api_fuzzing"] = fuzz_result
@@ -3172,7 +3181,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         # 2. Schema Analysis (if provided)
         if schema_url:
             logger.info("🔍 Phase 2: API schema analysis")
-            schema_result = self.api_schema_analyzer(schema_url)
+            schema_result = api_schema_analyzer(schema_url)
             if schema_result.get("success"):
                 audit_results["tests_performed"].append("schema_analysis")
                 audit_results["schema_analysis"] = schema_result
@@ -3183,7 +3192,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         # 3. JWT Analysis (if provided)
         if jwt_token:
             logger.info("🔍 Phase 3: JWT token analysis")
-            jwt_result = self.jwt_analyzer(jwt_token, base_url)
+            jwt_result = jwt_analyzer(jwt_token, base_url)
             if jwt_result.get("success"):
                 audit_results["tests_performed"].append("jwt_analysis")
                 audit_results["jwt_analysis"] = jwt_result
@@ -3194,7 +3203,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         # 4. GraphQL Testing (if provided)
         if graphql_endpoint:
             logger.info("🔍 Phase 4: GraphQL security scanning")
-            graphql_result = self.graphql_scanner(graphql_endpoint)
+            graphql_result = graphql_scanner(graphql_endpoint)
             if graphql_result.get("success"):
                 audit_results["tests_performed"].append("graphql_scanning")
                 audit_results["graphql_scanning"] = graphql_result
@@ -3352,7 +3361,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         return result
 
     @mcp.tool()
-    def hashpump_attack(signature: str, data: str, key_length: str, append_data: str, additional_args: str = "") -> Dict[str, Any]:
+    def hashpump_attack(signature: str, data_str: str, key_length: int, append_data: str, additional_args: str = "") -> Dict[str, Any]:
         """
         Execute HashPump for hash length extension attacks with enhanced logging.
 
@@ -3366,15 +3375,15 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         Returns:
             Hash length extension attack results
         """
-        data = {
+        payload_data = {
             "signature": signature,
-            "data": data,
+            "data": data_str,
             "key_length": key_length,
             "append_data": append_data,
             "additional_args": additional_args
         }
         logger.info(f"🔐 Starting HashPump attack")
-        result = hexstrike_client.safe_post("api/tools/hashpump", data)
+        result = hexstrike_client.safe_post("api/tools/hashpump", payload_data)
         if result.get("success"):
             logger.info(f"✅ HashPump attack completed")
         else:
@@ -3426,41 +3435,6 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
             logger.error(f"❌ Hakrawler crawling failed")
         return result
 
-    @mcp.tool()
-    def httpx_probe(targets: str = "", target_file: str = "", ports: str = "", methods: str = "GET", status_code: str = "", content_length: bool = False, output_file: str = "", additional_args: str = "") -> Dict[str, Any]:
-        """
-        Execute HTTPx for HTTP probing with enhanced logging.
-
-        Args:
-            targets: Target URLs or IPs
-            target_file: File containing targets
-            ports: Ports to probe
-            methods: HTTP methods to use
-            status_code: Filter by status code
-            content_length: Show content length
-            output_file: Output file path
-            additional_args: Additional HTTPx arguments
-
-        Returns:
-            HTTP probing results
-        """
-        data = {
-            "targets": targets,
-            "target_file": target_file,
-            "ports": ports,
-            "methods": methods,
-            "status_code": status_code,
-            "content_length": content_length,
-            "output_file": output_file,
-            "additional_args": additional_args
-        }
-        logger.info(f"🌐 Starting HTTPx probing")
-        result = hexstrike_client.safe_post("api/tools/httpx", data)
-        if result.get("success"):
-            logger.info(f"✅ HTTPx probing completed")
-        else:
-            logger.error(f"❌ HTTPx probing failed")
-        return result
 
     @mcp.tool()
     def paramspider_discovery(domain: str, exclude: str = "", output_file: str = "", level: int = 2, additional_args: str = "") -> Dict[str, Any]:
@@ -3571,14 +3545,14 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         return result
 
     @mcp.tool()
-    def arjun_scan(url: str, method: str = "GET", data: str = "", headers: str = "", timeout: str = "", output_file: str = "", additional_args: str = "") -> Dict[str, Any]:
+    def arjun_scan(url: str, method: str = "GET", data_val: str = "", headers: str = "", timeout: int = 10, output_file: str = "", additional_args: str = "") -> Dict[str, Any]:
         """
         Execute Arjun for parameter discovery with enhanced logging.
 
         Args:
             url: Target URL
             method: HTTP method (GET, POST, etc.)
-            data: POST data for testing
+            data_val: POST data for testing
             headers: Custom headers
             timeout: Request timeout
             output_file: Output file path
@@ -3587,17 +3561,17 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         Returns:
             Parameter discovery results
         """
-        data = {
+        payload_data = {
             "url": url,
             "method": method,
-            "data": data,
+            "data": data_val,
             "headers": headers,
             "timeout": timeout,
             "output_file": output_file,
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Arjun parameter discovery: {url}")
-        result = hexstrike_client.safe_post("api/tools/arjun", data)
+        result = hexstrike_client.safe_post("api/tools/arjun", payload_data)
         if result.get("success"):
             logger.info(f"✅ Arjun completed for {url}")
         else:
@@ -5234,7 +5208,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
 
     @mcp.tool()
     def browser_agent_inspect(url: str, headless: bool = True, wait_time: int = 5,
-                             action: str = "navigate", proxy_port: int = None, active_tests: bool = False) -> Dict[str, Any]:
+                             action: str = "navigate", proxy_port: Optional[int] = None, active_tests: bool = False) -> Dict[str, Any]:
         """
         AI-powered browser agent for comprehensive web application inspection and security analysis.
 
@@ -5281,7 +5255,7 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
 
     # ---------------- Additional HTTP Framework Tools (sync with server) ----------------
     @mcp.tool()
-    def http_set_rules(rules: list) -> Dict[str, Any]:
+    def http_set_rules(rules: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Set match/replace rules used to rewrite parts of URL/query/headers/body before sending.
         Rule format: {'where':'url|query|headers|body','pattern':'regex','replacement':'string'}"""
         payload = {"action": "set_rules", "rules": rules}
@@ -5294,14 +5268,15 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         return hexstrike_client.safe_post("api/tools/http-framework", payload)
 
     @mcp.tool()
-    def http_repeater(request_spec: dict) -> Dict[str, Any]:
+    def http_repeater(request_spec: Dict[str, Any]) -> Dict[str, Any]:
         """Send a crafted request (Burp Repeater equivalent). request_spec keys: url, method, headers, cookies, data."""
         payload = {"action": "repeater", "request": request_spec}
         return hexstrike_client.safe_post("api/tools/http-framework", payload)
 
     @mcp.tool()
-    def http_intruder(url: str, method: str = "GET", location: str = "query", params: list = None,
-                      payloads: list = None, base_data: dict = None, max_requests: int = 100) -> Dict[str, Any]:
+    def http_intruder(url: str, method: str = "GET", location: str = "query", params: Optional[List[Any]] = None,
+                      payloads: Optional[List[Any]] = None, base_data: Optional[Dict[str, Any]] = None,
+                      threads: int = 5, delay_ms: int = 0) -> Dict[str, Any]:
         """Simple Intruder (sniper) fuzzing. Iterates payloads over each param individually.
         location: query|body|headers|cookie."""
         payload = {
@@ -5312,7 +5287,8 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
             "params": params or [],
             "payloads": payloads or [],
             "base_data": base_data or {},
-            "max_requests": max_requests
+            "threads": threads,
+            "delay_ms": delay_ms
         }
         return hexstrike_client.safe_post("api/tools/http-framework", payload)
 
