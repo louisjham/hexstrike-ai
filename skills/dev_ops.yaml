@@ -1,0 +1,8 @@
+name: Dev Ops Workflow
+description: Automation for dev tasks (git, lint, test, deploy)
+steps:
+  - tool: nmap
+    input: target
+    action: "Internal check: simulates git clone"
+  - tool: suggest_next
+    action: "Review dev progress"

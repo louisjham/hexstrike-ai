@@ -1,0 +1,24 @@
+2026-02-20 02:43:37,329 [hexclaw.test] INFO: Starting Full-Cycle Recon Test
+2026-02-20 02:43:37,330 [hexclaw.test] INFO: Orchestrating goal: Perform full recon on vulnweb.com
+2026-02-20 02:43:37,330 [hexclaw.planner] INFO: Planning for goal: Perform full recon on vulnweb.com
+2026-02-20 02:43:37,337 [hexclaw.daemon] INFO: Enqueued job 8f3d49e6: recon_osint on vulnweb.com
+2026-02-20 02:43:37,337 [hexclaw.test] INFO: Job 8f3d49e6 enqueued.
+2026-02-20 02:43:37,338 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-20 02:44:25,707 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'none', 'redis_exact': False, 'redis_semantic': False}
+2026-02-20 02:44:25,707 [hexclaw.daemon] WARNING: Telegram not configured. Running in terminal-only mode.
+2026-02-20 02:44:25,708 [hexclaw.test] INFO: Monitoring job progress...
+2026-02-20 02:44:25,709 [hexclaw.test] INFO: Job 8f3d49e6 status: pending
+2026-02-20 02:44:25,711 [hexclaw.daemon] INFO: Starting skill execution: recon_osint (Job: 8f3d49e6)
+2026-02-20 02:44:25,724 [hexclaw.daemon] INFO: Step 1/7: Running amass
+2026-02-20 02:44:26,732 [hexclaw.daemon] INFO: Step 2/7: Running subfinder
+2026-02-20 02:44:27,714 [hexclaw.test] INFO: Job 8f3d49e6 status: running
+2026-02-20 02:44:27,744 [hexclaw.daemon] INFO: Step 3/7: Running httpx
+2026-02-20 02:44:28,755 [hexclaw.daemon] INFO: Step 4/7: Running rustscan
+2026-02-20 02:44:29,735 [hexclaw.test] INFO: Job 8f3d49e6 status: running
+2026-02-20 02:44:29,736 [hexclaw.daemon] INFO: Step 5/7: Running nmap
+2026-02-20 02:44:30,742 [hexclaw.daemon] INFO: Step 6/7: Running nuclei
+2026-02-20 02:44:31,758 [hexclaw.test] INFO: Job 8f3d49e6 status: running
+2026-02-20 02:44:31,758 [hexclaw.daemon] INFO: Step 7/7: Running suggest_next
+2026-02-20 02:44:33,768 [hexclaw.test] INFO: Job 8f3d49e6 status: done
+2026-02-20 02:44:33,769 [hexclaw.test] INFO: Test finished with status: done
+2026-02-20 02:44:33,769 [hexclaw.test] INFO: Result: {"status": "completed"}

@@ -1,0 +1,121 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# HexClaw Skill: recon_osint
+# PRD canonical workflow: amass → rustscan → nuclei → suggest_next
+#
+# Each step is executed by daemon.py → run_skill().
+# MCP endpoints are resolved by TOOL_ENDPOINT_MAP in daemon.py.
+#
+# Step fields:
+#   tool        — MCP tool name (maps to api/tools/<endpoint>)
+#   input       — context key to read target/data from (optional)
+#   output      — context key / parquet filename to write results into
+#   action      — internal action type (non-MCP steps only)
+#   params      — extra kwargs merged into the MCP payload
+#   on_fail     — "continue" (default) | "abort" — what to do if tool errors
+#   notify      — "always" (default) | "on_error" | "never"
+#   gate        — "none" (default) | "approve" — require operator approval
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: recon_osint
+version: "1.2"
+description: >
+  Full passive + active recon chain for a domain/IP target.
+  Discovers subdomains (amass/subfinder), maps open ports (rustscan),
+  fingerprints services (httpx), and scans for vulnerabilities (nuclei).
+  Concludes with a rule-based suggest_next step presented as Telegram buttons.
+
+# Operator controls
+approval_required: false        # set true to gate entire skill on pre-approval
+max_runtime_sec: 3600           # 1 hour hard limit
+notify_on_start: true
+
+steps:
+
+  # ── Step 1: Passive subdomain enumeration ──────────────────────────────────
+  - tool: amass
+    description: "Passive subdomain enumeration via certificate transparency and DNS"
+    output: subs
+    on_fail: continue
+    notify: always
+    params:
+      mode: passive             # passive = no brute-force, no active probing
+      max_time: 180             # seconds
+      resolvers: "8.8.8.8,1.1.1.1,9.9.9.9"
+
+  # ── Step 2: Subfinder (second source for subdomain coverage) ───────────────
+  - tool: subfinder
+    description: "Supplement amass with subfinder passive sources"
+    input: subs                 # append to existing subs context
+    output: subs
+    on_fail: continue
+    notify: on_error
+    params:
+      all_sources: true
+      timeout: 60
+
+  # ── Step 3: Resolve live hosts (httpx fingerprint sweep) ──────────────────
+  - tool: httpx
+    description: "Probe discovered subdomains for live HTTP/S services"
+    input: subs
+    output: live_hosts
+    on_fail: continue
+    notify: always
+    params:
+      status_code: true
+      title: true
+      tech_detect: true
+      follow_redirects: true
+      timeout: 10
+
+  # ── Step 4: Fast port scan on primary target ───────────────────────────────
+  - tool: rustscan
+    description: "Fast TCP port scan — top 65535 ports on primary target"
+    output: ports
+    on_fail: continue
+    notify: always
+    params:
+      timeout: 5000             # ms per connection
+      batch_size: 4500          # concurrent socket connections
+      range: "1-65535"
+
+  # ── Step 5: Service version fingerprint on open ports ─────────────────────
+  - tool: nmap
+    description: "Service/version fingerprint on discovered open ports"
+    input: ports
+    output: services
+    on_fail: continue
+    notify: on_error
+    params:
+      scan_profile: service     # -sV --version-intensity 5
+      timing: 4                 # T4 aggressive
+      scripts: "banner,http-title,ssl-cert"
+
+  # ── Step 6: Vulnerability scan ─────────────────────────────────────────────
+  - tool: nuclei
+    description: "Template-based vuln scan (medium, high, critical)"
+    input: live_hosts
+    output: vulns
+    on_fail: continue
+    notify: always
+    gate: none                  # auto-run (no operator approval needed)
+    params:
+      severity: "medium,high,critical"
+      timeout: 30
+      rate_limit: 150           # req/sec — polite rate limit
+      retries: 2
+      # Focused template tags — avoids noisy informational matches
+      tags: "cve,rce,sqli,xss,ssrf,lfi,idor,exposure,misconfig,default-login"
+      # Exclude templates that produce excessive false positives
+      exclude_tags: "dos,fuzzing"
+
+  # ── Step 7: Rule-based suggest_next (0 inference) ─────────────────────────
+  # This is an internal step — daemon.py handles it without an MCP call.
+  # It reads all_findings accumulated from previous steps and generates
+  # Telegram inline keyboard buttons for operator to choose next action.
+  - tool: suggest_next
+    description: "Present Telegram inline buttons for operator-chosen next step"
+    action: suggest_next
+    notify: always
+    params:
+      max_choices: 4
+      timeout_sec: 300          # 5 min to choose before auto-skip

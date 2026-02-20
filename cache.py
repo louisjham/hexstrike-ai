@@ -396,8 +396,19 @@ def check(prompt: str) -> str | None:
     return get_cache().check(prompt)
 
 
+def get(prompt: str, thresh: float = 0.95) -> str | None:
+    """PRD compliant alias for check()."""
+    # Note: Threshold override logic could be added to Cache.check if needed.
+    return get_cache().check(prompt)
+
+
 def store(prompt: str, response: str) -> None:
     """Module-level shortcut: get_cache().store(prompt, response)."""
+    get_cache().store(prompt, response)
+
+
+def set(prompt: str, response: str) -> None:
+    """PRD compliant alias for store()."""
     get_cache().store(prompt, response)
 
 

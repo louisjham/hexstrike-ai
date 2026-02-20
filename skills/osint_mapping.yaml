@@ -1,0 +1,8 @@
+name: OSINT Mapping Workflow
+description: Information gathering from public sources
+steps:
+  - tool: subfinder
+    input: target
+    output: subdomains
+  - tool: suggest_next
+    action: "Analyze leak data"

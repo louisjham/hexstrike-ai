@@ -66,6 +66,7 @@ ALLOWED_CHAT_ID: int | None = int(os.getenv("TELEGRAM_CHAT_ID", "0")) or None
 # Filled in by daemon.py when it starts, so telegram.py can enqueue work
 _enqueue_callback: Callable[[str, dict[str, Any]], Coroutine] | None = None
 _status_callback: Callable[[], list[dict[str, Any]]] | None = None
+_orchestrate_callback: Callable[[str], Coroutine] | None = None
 
 # Pending approval gates: approval_id → asyncio.Future
 _pending_approvals: dict[str, asyncio.Future] = {}
@@ -85,6 +86,12 @@ def register_status(fn: Callable) -> None:
     """Register the daemon's status getter so /status can query jobs."""
     global _status_callback
     _status_callback = fn
+
+
+def register_orchestrate(fn: Callable) -> None:
+    """Register the daemon's orchestrate coroutine."""
+    global _orchestrate_callback
+    _orchestrate_callback = fn
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -118,6 +125,8 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     text = (
         "🦾 *HexClaw Commands*\n\n"
+        "`/orchestrate <goal>` — Orchestrate a multi-step workflow via goal\n"
+        "`/edit <workflow>` — View/edit workflow YAML (v2 placeholder)\n"
         "`/recon <target>` — Run full recon chain (amass→rustscan→nuclei)\n"
         "`/status` — List running / queued jobs\n"
         "`/stats` — Inference usage dashboard\n"
@@ -158,6 +167,55 @@ async def cmd_recon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as exc:
         log.exception("Enqueue failed")
         await msg.edit_text(f"❌ Failed to enqueue: {exc}")
+
+
+async def cmd_orchestrate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not _is_allowed(update):
+        return await _unauthorized(update)
+
+    args = context.args
+    if not args:
+        await update.message.reply_text(
+            "Usage: `/orchestrate <goal>`\nExample: `/orchestrate \"scan example.com for vulns\"`",
+            parse_mode="Markdown",
+        )
+        return
+
+    goal = " ".join(args).strip()
+    msg = await update.message.reply_text(
+        f"🤖 Planning orchestration for goal: *{goal}*...", parse_mode="Markdown"
+    )
+
+    if _orchestrate_callback is None:
+        await msg.edit_text("❌ Daemon not connected. Is daemon.py running?")
+        return
+
+    try:
+        job_id = await _orchestrate_callback(goal)
+        await msg.edit_text(
+            f"✅ Orchestration started. Job `{job_id}` queued.\n"
+            f"Use /status to track progress.",
+            parse_mode="Markdown",
+        )
+    except Exception as exc:
+        log.exception("Orchestrate failed")
+        await msg.edit_text(f"❌ Failed to orchestrate: {exc}")
+
+
+async def cmd_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not _is_allowed(update):
+        return await _unauthorized(update)
+
+    args = context.args
+    if not args:
+        await update.message.reply_text("Usage: `/edit <workflow_name>`", parse_mode="Markdown")
+        return
+
+    workflow = args[0].strip()
+    await update.message.reply_text(
+        f"📝 *YAML Editor (v2)*\nReading `{workflow}.yaml`...\n\n_Note: Inline editing coming in v2.1._",
+        parse_mode="Markdown",
+    )
 
 
 async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -435,6 +493,22 @@ class Notifier:
         except Exception as exc:
             log.error("Telegram send failed: %s", exc)
 
+    async def send_file(self, file_path: str, caption: str | None = None) -> None:
+        """Send a document/file to the operator."""
+        try:
+            path = Path(file_path)
+            if not path.exists():
+                log.error(f"File not found for Telegram: {file_path}")
+                return
+            with open(path, "rb") as fh:
+                await self._get_bot().send_document(
+                    chat_id=self._chat_id,
+                    document=fh,
+                    caption=caption[:1024] if caption else None,
+                )
+        except Exception as exc:
+            log.error(f"Telegram file send failed: {exc}")
+
     async def send_report(
         self,
         job_id: str,
@@ -529,6 +603,8 @@ def build_application() -> "Application":
 
     app.add_handler(CommandHandler("help", cmd_help))
     app.add_handler(CommandHandler("start", cmd_help))
+    app.add_handler(CommandHandler("orchestrate", cmd_orchestrate))
+    app.add_handler(CommandHandler("edit", cmd_edit))
     app.add_handler(CommandHandler("recon", cmd_recon))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("stats", cmd_stats))

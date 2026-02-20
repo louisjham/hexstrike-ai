@@ -432,7 +432,8 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         else:
             logger.error(f"{HexStrikeColors.ERROR}❌ Nuclei scan failed for {target}{HexStrikeColors.RESET}")
 
-        return result
+
+
 
     # ============================================================================
     # US MASSCAN VULNERABILITY RECONNAISSANCE TOOL

@@ -1,0 +1,20 @@
+2026-02-20 02:16:03,361 [hexclaw.monitor] WARNING: Failed to fetch feed https://feeds.feedburner.com/TheHackersNews: No module named 'httpx'
+2026-02-20 02:16:03,361 [hexclaw.monitor] WARNING: Failed to fetch feed https://www.bleepingcomputer.com/feed/: No module named 'httpx'
+2026-02-20 02:16:03,362 [hexclaw.monitor] WARNING: Failed to fetch feed https://www.cisa.gov/cybersecurity-advisories/all.xml: No module named 'httpx'
+2026-02-20 02:16:03,362 [hexclaw.monitor] WARNING: Failed to fetch feed https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml: No module named 'httpx'
+2026-02-20 02:16:03,362 [hexclaw.monitor] WARNING: Failed to fetch feed https://www.exploit-db.com/rss.xml: No module named 'httpx'
+2026-02-20 02:16:03,362 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold
+2026-02-20 02:16:03,538 [hexclaw.monitor] INFO: Sending test alert...
+2026-02-20 02:16:03,539 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: 'charmap' codec can't encode characters in position 2-4: character maps to <undefined>
+2026-02-20 02:16:03,539 [hexclaw.monitor] INFO: Test alert sent.
+2026-02-20 02:16:27,553 [hexclaw.monitor] INFO: Sending test alert...
+2026-02-20 02:16:27,553 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: 'charmap' codec can't encode character '\u26aa' in position 0: character maps to <undefined>
+2026-02-20 02:16:27,553 [hexclaw.monitor] INFO: Test alert sent.
+2026-02-20 02:16:47,848 [hexclaw.monitor] INFO: Sending test alert...
+2026-02-20 02:16:47,849 [hexclaw.monitor] INFO: Test alert sent.
+2026-02-20 02:16:48,153 [hexclaw.monitor] WARNING: Failed to fetch feed https://feeds.feedburner.com/TheHackersNews: No module named 'httpx'
+2026-02-20 02:16:48,154 [hexclaw.monitor] WARNING: Failed to fetch feed https://www.bleepingcomputer.com/feed/: No module named 'httpx'
+2026-02-20 02:16:48,155 [hexclaw.monitor] WARNING: Failed to fetch feed https://www.cisa.gov/cybersecurity-advisories/all.xml: No module named 'httpx'
+2026-02-20 02:16:48,155 [hexclaw.monitor] WARNING: Failed to fetch feed https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml: No module named 'httpx'
+2026-02-20 02:16:48,155 [hexclaw.monitor] WARNING: Failed to fetch feed https://www.exploit-db.com/rss.xml: No module named 'httpx'
+2026-02-20 02:16:48,155 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold

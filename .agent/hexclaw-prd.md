@@ -1,46 +1,49 @@
-# HexClaw PRD v1.0
-**Autonomous cybersecurity agent** (HexStrike MCP + OpenClaw daemon). Thrifty inference, Telegram hub.
+# HexClaw PRD v2.0
+**Universal Agent Orchestration Engine**
+Not pentest-only: End-to-end workflows (cyber/OSINT/dev/automation). YAML configs, Telegram hub.
 
-## Tech Stack
-- Backend: Python asyncio daemon, MCP server wrapper
-- Data: DuckDB(analytics/Parquet), Postgres(storage)
-- Comms: Telegram bot (inline buttons/approvals)
-- Inference: LiteLLM (Google Pro/Z.AI/OpenRouter/free); Redis cache (exact/semantic)
-- Email: SMTP app + temp-mails throwaways
-- Monitor: RSS/CVE alerts → Telegram
+## Tech Stack & Architecture
+- **Backend**: Python asyncio daemon, MCP server wrapper.
+- **Orchestration**: YAML-based workflow loader, dynamic "Agent Planner" (low-token).
+- **Data**: DuckDB (analytics/Parquet), Postgres (storage/job state).
+- **Inference**: LiteLLM (Google Pro/OpenRouter/free); Redis semantic cache.
+- **Interface**: Telegram bot (v2: voice, inline graphs, interactive buttons, file uploads).
+- **Plugins**: MCP-compatible tools (Git, Docker, HexStrike, any CLI).
 
-## Core Modules (Implement order)
-1. **install.py**: pip deps/redis/postgres/temp-mails/.env/service
-2. **daemon.py**: Heartbeat poll queue, MCP chains, notify Telegram
-3. **inference.py**: Provider rotate/tier (high=google_pro); token log sqlite
-4. **cache.py**: Redis exact+semantic (embeddings); check before LLM
-5. **telegram.py**: Hub bot (/recon/status); inline approve/multi-choice
-6. **data.py**: DuckDB query/store Parquet; Postgres aggregate; text-to-sql suggest_next
-7. **skills/**: recon_osint.yaml (amass/rustscan/nuclei); vuln_prioritize.py
-8. **monitor.py**: RSS CVE/Shodan → Telegram alert + suggest
+## Core Modules (Updated)
+1.  **install.py**: Dependency & environment management.
+2.  **daemon.py**: (Extended) YAML workflow engine, heartbeat pool, `/orchestrate` goal handler.
+3.  **planner.py**: (New) LLM-powered goal-to-workflow translator. Generates execution graphs.
+4.  **telegram_ui.py**: (Enhanced) Rich interactivity: /plan, /orchestrate, /edit workflow, voice commands.
+5.  **skills/**: YAML templates for Cyber, Dev, OSINT, and Custom automation.
+6.  **monitor.py**: Threat Intel / CVE alerts with proactive "Suggest & Orchestrate" triggers.
 
-## Workflows (MCP YAML)
-us-recon:
+## Orchestration Workflows
+### 1. Cyber (Default)
+`recon → suggest → nuclei → exploit → report`
+### 2. Dev-Ops
+`git clone → lint → test → deploy`
+### 3. OSINT
+`breach hunt → social mapping → darkweb scan → report`
+### 4. Custom
+`User-defined YAML drop-in`
 
-amass → subs.parquet
+## Telegram Command Set (v2)
+- `/orchestrate "<goal>"`: Generate and confirm a multi-step plan.
+- `/plan`: View current/pending workflow graph.
+- `/edit <workflow>`: Inline YAML editing.
+- `/recon <target>`: Legacy single-skill shortcut.
+- `/status`: Real-time job dashboard.
 
-rustscan → ports.parquet
+## Efficiency Constraints
+- **0-Token Gating**: Use rules and cached responses where possible.
+- **Telegram Buttons**: No inference for standard multi-choices.
+- **Low-Token Planner**: Use cheap models (Flash/Haiku) for planning; Pro/High-tier only for complex exploit/dev logic.
 
-nuclei → vulns.parquet
+## Success Metrics
+- Plan-to-Execution latency < 5s.
+- /orchestrate success rate > 80% without manual YAML correction.
+- Telegram-only management (zero SSH required for daily Ops).
 
-suggest_next → Telegram buttons
-
-text
-
-## Constraints (0 tokens where possible)
-- Rules/cache > LLM
-- Telegram buttons = 0 inference
-- SQL cache hits for analytics
-- Free/low tier for status/plans
-
-## Success
-- /recon target → Full chain → Telegram report (under 100 tokens total)
-- Alerts → Approve → Execute
-- Usage dashboard /stats
-
-PRD complete. Generate code modularly: install→daemon→etc.
+---
+*PRD v2.0 finalized. Proceed to implementation of Orchestrator Engine.*

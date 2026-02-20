@@ -1,0 +1,5 @@
+name: Agent Plan
+description: Generic fallback for unmapped goals
+steps:
+  - tool: suggest_next
+    action: "Human-in-the-loop: suggest custom steps"
