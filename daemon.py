@@ -129,12 +129,14 @@ def update_job_status(job_id: str, status: str, result: Any = None, error: str =
 
 # ── Skills & MCP ──────────────────────────────────────────────────────────────
 async def run_skill(job_id: str, skill_name: str, params: dict, notifier: Notifier | NullNotifier):
-    log.info(f"Starting skill execution: {skill_name} (Job: {job_id})")
+    target = params.get("target", "unknown")
+    log.info(f"[Job {job_id}] Skill dispatch: {skill_name} → {target}")
     update_job_status(job_id, JobStatus.RUNNING)
     
     skill_file = SKILLS_DIR / f"{skill_name}.yaml"
     if not skill_file.exists():
-        err = f"Skill {skill_name} not found"
+        err = f"Skill {skill_name} not found at {skill_file}"
+        log.error(f"[Job {job_id}] {err}")
         update_job_status(job_id, JobStatus.FAILED, error=err)
         await notifier.send(f"❌ Job {job_id} failed: {err}")
         return
@@ -143,15 +145,18 @@ async def run_skill(job_id: str, skill_name: str, params: dict, notifier: Notifi
         skill_def = yaml.safe_load(f)
 
     steps = skill_def.get("steps", [])
+    log.info(f"[Job {job_id}] Loaded skill '{skill_name}' with {len(steps)} steps")
     context = params.copy()
     
     for i, step in enumerate(steps, 1):
         tool = step.get("tool")
         action = step.get("action")
-        log.info(f"Step {i}/{len(steps)}: Running {tool} (Action: {action})")
+        step_params = step.get("params", {})
+        log.info(f"[Job {job_id}] Step {i}/{len(steps)}: tool={tool} action={action}")
         
         # 1. Internal Action Handler
         if action == "store_findings":
+            log.info(f"[Job {job_id}] Storing findings to analytical layer")
             # Simulate some findings if context is empty
             if not context.get("findings"):
                 context["findings"] = [
@@ -160,39 +165,44 @@ async def run_skill(job_id: str, skill_name: str, params: dict, notifier: Notifi
                 ]
             df = pd.DataFrame(context["findings"])
             data.store_parquet(df, f"job_{job_id}")
-            await notifier.send(f"💾 Job {job_id}: Findings stored to analytical layer.")
+            log.info(f"[Job {job_id}] Stored {len(context['findings'])} findings to parquet")
+            await notifier.send(f"💾 Job {job_id}: {len(context['findings'])} findings stored.")
             continue
 
         if action == "suggest_next":
+            log.info(f"[Job {job_id}] Generating next-step suggestions for {skill_name}")
             suggestions = data.suggest_next(skill_name)
             # Prioritize vulnerabilities for the notification
             top_vulns = vuln_prioritize.get_top_cves(f"job_{job_id}")
+            log.info(f"[Job {job_id}] Suggestions: {suggestions} | Top CVEs: {top_vulns[:80]}")
             
             prompt = f"🎯 *Recon Complete for {context.get('target', 'Target')}*\n\n{top_vulns}\n\nWhat would you like to do next?"
             
             # Send buttons to Telegram
+            log.info(f"[Job {job_id}] Awaiting operator approval (timeout={step_params.get('timeout_sec', 300)}s)")
             choice = await notifier.request_approval(
                 approval_id=f"suggest:{job_id}",
                 prompt=prompt,
                 choices=suggestions,
-                timeout_sec=step.get("params", {}).get("timeout_sec", 300)
+                timeout_sec=step_params.get("timeout_sec", 300)
             )
             
+            log.info(f"[Job {job_id}] Operator response: {choice}")
             if choice["action"] == "choice":
-                # Orchestrate the chosen next step
                 new_goal = f"{choice['choice']} on {context.get('target')}"
+                log.info(f"[Job {job_id}] Operator chose: {choice['choice']} → goal: {new_goal}")
                 await notifier.send(f"🚀 User selected: *{choice['choice']}*. Orchestrating...")
-                # We can't easily call orchestrate here without a reference, 
-                # but we can enqueue a new goal.
-                # For v1.0, we'll just log it. 
-                # (In a real system, we'd trigger a new job)
+            elif choice["action"] == "timeout":
+                log.warning(f"[Job {job_id}] Approval timed out — skipping suggest_next")
             continue
 
         # 2. Tool Endpoint Map / MCP Call (Placeholder)
+        log.info(f"[Job {job_id}] Dispatching tool: {tool}")
         await notifier.send(f"🔄 Job {job_id} step {i}: {tool}...")
         await asyncio.sleep(1) # Simulating work
 
     update_job_status(job_id, JobStatus.DONE, result={"status": "completed"})
+    log.info(f"[Job {job_id}] ✅ Skill '{skill_name}' completed successfully")
     await notifier.send(f"✅ Job {job_id} complete!")
 
 # ── Daemon ────────────────────────────────────────────────────────────────────
@@ -232,6 +242,11 @@ class HexClawDaemon:
 
         if token and chat_id:
             self.notifier = Notifier(token, int(chat_id))
+
+            # ── Centralised Telegram logging ──────────────────────────────
+            import tg_log
+            tg_log.install()  # every log.info/warning/error → Telegram
+
             await self.notifier.send("🦾 HexClaw Daemon Online (v1.0)")
             
             # Start Telegram Bot

@@ -105,15 +105,16 @@ class InferenceEngine:
         # ── Cache check first ─────────────────────────────────────────────────
         hit = cache.get(f"{system}\n\n{prompt}")
         if hit:
-            log.info("Cache hit! Skipping LLM call.")
+            log.info(f"Cache HIT for tier={complexity} — 0 tokens, $0.00")
             log_tokens("cache", "exact-semantic", complexity, 0, 0, 0.0)
             return hit
 
         if not LITELLM_AVAILABLE:
-            log.warning("LiteLLM not available. Returning stub.")
+            log.warning("LiteLLM not available. Returning stub response.")
             return f"[LiteLLM Stub] {prompt[:50]}..."
 
         model = self.select_model(complexity)
+        log.info(f"LLM call: model={model} tier={complexity} prompt_len={len(prompt)}")
         try:
             response = await litellm.acompletion(
                 model=model,
@@ -126,6 +127,9 @@ class InferenceEngine:
             
             text = response.choices[0].message.content
             usage = response.usage
+            cost = getattr(response, "_hidden_params", {}).get("response_cost", 0.0)
+            
+            log.info(f"LLM response: {usage.prompt_tokens}↑ {usage.completion_tokens}↓ tokens · ${cost:.4f} · {len(text)} chars")
             
             # ── Store in cache ────────────────────────────────────────────────
             cache.set(f"{system}\n\n{prompt}", text)
@@ -136,12 +140,11 @@ class InferenceEngine:
                 tier=complexity,
                 tokens_in=usage.prompt_tokens,
                 tokens_out=usage.completion_tokens,
-                cost=getattr(response, "_hidden_params", {}).get("response_cost", 0.0)
+                cost=cost
             )
             return text
         except Exception as e:
-            log.error(f"Inference failed for {model}: {e}")
-            # Optional: Automatic tier rotation logic could go here
+            log.error(f"Inference FAILED for {model}: {e}")
             return f"Error: {e}"
 
     def ask_sync(self, prompt: str, complexity: str = "low") -> str:

@@ -29,13 +29,15 @@ def plan_goal(goal: str) -> dict[str, Any]:
         "steps": list (optional override)
     }
     """
-    log.info("Planning for goal: %s", goal)
+    log.info("Planning goal: '%s'", goal)
     
     # If API keys are available and litellm is installed, try LLM planning
     if litellm and os.getenv("GOOGLE_API_KEY"):
+        log.info("Using LLM planner (litellm + Gemini available)")
         return _plan_with_llm(goal)
     
     # Fallback: Rule-based planning
+    log.info("Using rule-based planner (no LLM available)")
     return _plan_with_rules(goal)
 
 def _plan_with_rules(goal: str) -> dict[str, Any]:
@@ -45,9 +47,11 @@ def _plan_with_rules(goal: str) -> dict[str, Any]:
     import re
     domain_match = re.search(r'([a-z0-9]+(-[a-z0-9]+)*\.)+([a-z]{2,})', goal_lower)
     target = domain_match.group(0) if domain_match else "unknown"
+    log.info("Extracted target: %s", target)
     
     # Cyber / Recon
     if any(kw in goal_lower for kw in ["scan", "recon", "domain", "vuln", "nuclei"]):
+        log.info("Rule match → skill: recon_osint")
         return {
             "skill": "recon_osint",
             "params": {"target": target, "description": "Auto-planned recon based on goal"}
@@ -55,6 +59,7 @@ def _plan_with_rules(goal: str) -> dict[str, Any]:
     
     # Dev / Git
     if any(kw in goal_lower for kw in ["git", "clone", "deploy", "lint", "test"]):
+        log.info("Rule match → skill: dev_ops")
         return {
             "skill": "dev_ops",
             "params": {"target": target, "action": "clone_and_test"}
@@ -62,12 +67,14 @@ def _plan_with_rules(goal: str) -> dict[str, Any]:
     
     # OSINT / Social
     if any(kw in goal_lower for kw in ["breach", "social", "darkweb", "email"]):
+        log.info("Rule match → skill: osint_mapping")
         return {
             "skill": "osint_mapping",
             "params": {"target": target}
         }
     
     # Default: agent_plan (generic)
+    log.info("No rule matched → default skill: agent_plan")
     return {
         "skill": "agent_plan",
         "params": {"target": target, "goal": goal}
