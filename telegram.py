@@ -71,6 +71,9 @@ _orchestrate_callback: Callable[[str], Coroutine] | None = None
 # Pending approval gates: approval_id → asyncio.Future
 _pending_approvals: dict[str, asyncio.Future] = {}
 
+# Pending orchestration plans: approval_id → {skill, params, goal}
+_pending_plans: dict[str, dict[str, Any]] = {}
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Registration helpers (called by daemon.py at startup)
@@ -222,7 +225,7 @@ async def cmd_orchestrate(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     ]
     
     # Store the plan temporarily associated with this approval_id
-    _pending_approvals[approval_id] = {
+    _pending_plans[approval_id] = {
         "skill": skill,
         "params": params,
         "goal": goal
@@ -569,44 +572,42 @@ async def _handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     if action == "orch_ok" and len(parts) >= 2:
         approval_id = parts[1]
-        data_obj = _pending_approvals.get(approval_id)
-        if data_obj and isinstance(data_obj, dict) and _enqueue_callback:
+        plan = _pending_plans.pop(approval_id, None)
+        if plan and _enqueue_callback:
             try:
-                job_id = await _enqueue_callback(data_obj['skill'], data_obj['params'])
+                job_id = await _enqueue_callback(plan['skill'], plan['params'])
                 await query.edit_message_text(f"🚀 *Orchestration Approved*\nEnqueued Job `{job_id}`", parse_mode="Markdown")
             except Exception as e:
                 await query.edit_message_text(f"❌ Enqueue failed: {e}")
-            _pending_approvals.pop(approval_id, None)
-            
+
     elif action == "orch_no" and len(parts) >= 2:
         approval_id = parts[1]
-        _pending_approvals.pop(approval_id, None)
+        _pending_plans.pop(approval_id, None)
         await query.edit_message_text("🚫 *Orchestration Aborted*", parse_mode="Markdown")
 
     elif action == "orch_ports" and len(parts) >= 2:
         approval_id = parts[1]
-        data_obj = _pending_approvals.get(approval_id)
-        if data_obj and isinstance(data_obj, dict) and _enqueue_callback:
-            params = data_obj['params'].copy()
+        plan = _pending_plans.pop(approval_id, None)
+        if plan and _enqueue_callback:
+            params = plan['params'].copy()
             params['ports_only'] = True
             try:
-                job_id = await _enqueue_callback(data_obj['skill'], params)
+                job_id = await _enqueue_callback(plan['skill'], params)
                 await query.edit_message_text(f"🔍 *Port Scan Only Approved*\nEnqueued Job `{job_id}`", parse_mode="Markdown")
             except Exception as e:
                 await query.edit_message_text(f"❌ Enqueue failed: {e}")
-            _pending_approvals.pop(approval_id, None)
 
     elif action == "approve" and len(parts) >= 2:
         approval_id = parts[1]
         future = _pending_approvals.get(approval_id)
-        if future and isinstance(future, asyncio.Future) and not future.done():
+        if future and not future.done():
             future.set_result({"action": "approve", "choice": None})
         await query.edit_message_text("✅ Approved.")
 
     elif action == "deny" and len(parts) >= 2:
         approval_id = parts[1]
         future = _pending_approvals.get(approval_id)
-        if future and isinstance(future, asyncio.Future) and not future.done():
+        if future and not future.done():
             future.set_result({"action": "deny", "choice": None})
         await query.edit_message_text("❌ Denied.")
 
@@ -614,7 +615,7 @@ async def _handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         approval_id = parts[1]
         choice = parts[2]
         future = _pending_approvals.get(approval_id)
-        if future and isinstance(future, asyncio.Future) and not future.done():
+        if future and not future.done():
             future.set_result({"action": "choice", "choice": choice})
         await query.edit_message_text(f"✅ Selected: *{choice}*", parse_mode="Markdown")
 
