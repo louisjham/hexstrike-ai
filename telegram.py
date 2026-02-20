@@ -125,12 +125,11 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     text = (
         "🦾 *HexClaw Commands*\n\n"
-        "`/orchestrate <goal>` — Orchestrate a multi-step workflow via goal\n"
-        "`/edit <workflow>` — View/edit workflow YAML (v2 placeholder)\n"
-        "`/recon <target>` — Run full recon chain (amass→rustscan→nuclei)\n"
-        "`/status` — List running / queued jobs\n"
-        "`/stats` — Inference usage dashboard\n"
-        "`/cancel <job_id>` — Cancel a queued job\n"
+        "`/orchestrate <goal>` — Plan and run a workflow from a goal\n"
+        "`/recon <target>` — Run full recon chain\n"
+        "`/status` — Queue and inference usage\n"
+        "`/stats` — Detailed inference dashboard\n"
+        "`/cancel <job_id>` — Cancel a job\n"
         "`/help` — Show this message"
     )
     await update.message.reply_text(text, parse_mode="Markdown")
@@ -176,30 +175,49 @@ async def cmd_orchestrate(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     args = context.args
     if not args:
         await update.message.reply_text(
-            "Usage: `/orchestrate <goal>`\nExample: `/orchestrate \"scan example.com for vulns\"`",
+            "Usage: `/orchestrate <goal>`\nExample: `/orchestrate \"scan vulnweb.com\"`",
             parse_mode="Markdown",
         )
         return
 
     goal = " ".join(args).strip()
-    msg = await update.message.reply_text(
-        f"🤖 Planning orchestration for goal: *{goal}*...", parse_mode="Markdown"
+    
+    import planner
+    import yaml
+    
+    # 1. Generate plan
+    plan = planner.plan_goal(goal)
+    skill = plan.get("skill", "agent_plan")
+    params = plan.get("params", {})
+    
+    plan_text = f"🤖 *Goal:* {goal}\n\n"
+    plan_text += f"🛠 *Planned Skill:* `{skill}`\n"
+    plan_text += f"📦 *Parameters:*\n```yaml\n{yaml.dump(params)}```\n"
+    plan_text += "Proceed with orchestration?"
+    
+    # 2. Ask for approval
+    approval_id = f"orch:{os.urandom(4).hex()}"
+    
+    buttons = [
+        [
+            InlineKeyboardButton("🚀 Approve", callback_data=f"orch_ok:{approval_id}"),
+            InlineKeyboardButton("🚫 Abort", callback_data=f"orch_no:{approval_id}"),
+        ],
+        [InlineKeyboardButton("🔍 Ports Only", callback_data=f"orch_ports:{approval_id}")]
+    ]
+    
+    # Store the plan temporarily associated with this approval_id
+    _pending_approvals[approval_id] = {
+        "skill": skill,
+        "params": params,
+        "goal": goal
+    }
+    
+    await update.message.reply_text(
+        plan_text, 
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(buttons)
     )
-
-    if _orchestrate_callback is None:
-        await msg.edit_text("❌ Daemon not connected. Is daemon.py running?")
-        return
-
-    try:
-        job_id = await _orchestrate_callback(goal)
-        await msg.edit_text(
-            f"✅ Orchestration started. Job `{job_id}` queued.\n"
-            f"Use /status to track progress.",
-            parse_mode="Markdown",
-        )
-    except Exception as exc:
-        log.exception("Orchestrate failed")
-        await msg.edit_text(f"❌ Failed to orchestrate: {exc}")
 
 
 async def cmd_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -227,34 +245,35 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         return
 
     try:
+        # Get jobs and usage stats
         jobs = _status_callback()
+        
+        # Build message
+        lines = ["📊 *System Status*"]
+        
+        # 1. Job Queue
+        lines.append("\n📋 *Active Queue:*")
+        if not jobs:
+            lines.append("  _No active jobs_")
+        else:
+            icons = {"pending": "⏳", "running": "🔄", "done": "✅", "failed": "❌"}
+            for j in jobs[:5]:
+                icon = icons.get(j['status'], "❓")
+                lines.append(f"  {icon} `{j['id']}` {j['skill']} ({j['target']})")
+        
+        # 2. Summarised Usage (Short)
+        try:
+            import inference
+            usage = inference.usage_report()
+            total_cost = sum(v['total_cost'] for v in usage.values() if v.get('total_cost'))
+            lines.append(f"\n💸 *Cost Usage:* `${total_cost:.4f}`")
+        except:
+            pass
+            
+        await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+        
     except Exception as exc:
         await update.message.reply_text(f"❌ Error fetching status: {exc}")
-        return
-
-    if not jobs:
-        await update.message.reply_text("📭 No active jobs.")
-        return
-
-    lines = ["📋 *Active Jobs*\n"]
-    icons = {
-        "pending": "⏳",
-        "running": "🔄",
-        "done": "✅",
-        "failed": "❌",
-        "cancelled": "🚫",
-    }
-    for job in jobs[:20]:  # cap at 20 to avoid message length limit
-        icon = icons.get(job.get("status", ""), "❓")
-        jid = job.get("id", "?")
-        skill = job.get("skill", "?")
-        target = job.get("target", "?")
-        status = job.get("status", "?")
-        elapsed = job.get("elapsed_sec")
-        elapsed_str = f" ({elapsed}s)" if elapsed else ""
-        lines.append(f"{icon} `{jid}` *{skill}* → `{target}` [{status}]{elapsed_str}")
-
-    await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
 async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -278,8 +297,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 COUNT(*)        AS calls,
                 SUM(tokens_in)  AS tok_in,
                 SUM(tokens_out) AS tok_out,
-                SUM(cost_usd)   AS cost,
-                SUM(cache_hit)  AS cache_hits
+                SUM(cost)       AS cost
             FROM token_log
             GROUP BY provider, model
             ORDER BY cost DESC
@@ -290,8 +308,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 COUNT(*)        AS calls,
                 SUM(tokens_in)  AS tok_in,
                 SUM(tokens_out) AS tok_out,
-                SUM(cost_usd)   AS cost,
-                SUM(cache_hit)  AS cache_hits
+                SUM(cost)       AS cost
             FROM token_log
         """).fetchone()
         conn.close()
@@ -419,9 +436,12 @@ async def request_approval(
     return result
 
 
+
 async def _handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Resolve pending approval futures when operator presses an inline button."""
     query = update.callback_query
+    if not query:
+        return
     await query.answer()
 
     data: str = query.data or ""
@@ -432,17 +452,46 @@ async def _handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     action = parts[0]
 
-    if action == "approve" and len(parts) >= 2:
+    if action == "orch_ok" and len(parts) >= 2:
+        approval_id = parts[1]
+        data_obj = _pending_approvals.get(approval_id)
+        if data_obj and isinstance(data_obj, dict) and _enqueue_callback:
+            try:
+                job_id = await _enqueue_callback(data_obj['skill'], data_obj['params'])
+                await query.edit_message_text(f"🚀 *Orchestration Approved*\nEnqueued Job `{job_id}`", parse_mode="Markdown")
+            except Exception as e:
+                await query.edit_message_text(f"❌ Enqueue failed: {e}")
+            _pending_approvals.pop(approval_id, None)
+            
+    elif action == "orch_no" and len(parts) >= 2:
+        approval_id = parts[1]
+        _pending_approvals.pop(approval_id, None)
+        await query.edit_message_text("🚫 *Orchestration Aborted*", parse_mode="Markdown")
+
+    elif action == "orch_ports" and len(parts) >= 2:
+        approval_id = parts[1]
+        data_obj = _pending_approvals.get(approval_id)
+        if data_obj and isinstance(data_obj, dict) and _enqueue_callback:
+            params = data_obj['params'].copy()
+            params['ports_only'] = True
+            try:
+                job_id = await _enqueue_callback(data_obj['skill'], params)
+                await query.edit_message_text(f"🔍 *Port Scan Only Approved*\nEnqueued Job `{job_id}`", parse_mode="Markdown")
+            except Exception as e:
+                await query.edit_message_text(f"❌ Enqueue failed: {e}")
+            _pending_approvals.pop(approval_id, None)
+
+    elif action == "approve" and len(parts) >= 2:
         approval_id = parts[1]
         future = _pending_approvals.get(approval_id)
-        if future and not future.done():
+        if future and isinstance(future, asyncio.Future) and not future.done():
             future.set_result({"action": "approve", "choice": None})
         await query.edit_message_text("✅ Approved.")
 
     elif action == "deny" and len(parts) >= 2:
         approval_id = parts[1]
         future = _pending_approvals.get(approval_id)
-        if future and not future.done():
+        if future and isinstance(future, asyncio.Future) and not future.done():
             future.set_result({"action": "deny", "choice": None})
         await query.edit_message_text("❌ Denied.")
 
@@ -450,7 +499,7 @@ async def _handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         approval_id = parts[1]
         choice = parts[2]
         future = _pending_approvals.get(approval_id)
-        if future and not future.done():
+        if future and isinstance(future, asyncio.Future) and not future.done():
             future.set_result({"action": "choice", "choice": choice})
         await query.edit_message_text(f"✅ Selected: *{choice}*", parse_mode="Markdown")
 

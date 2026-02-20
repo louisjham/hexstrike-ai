@@ -29,6 +29,7 @@ from telegram import Notifier, register_enqueue, register_status, register_orche
 import planner
 import cache
 import inference
+import monitor
 
 load_dotenv()
 
@@ -108,6 +109,13 @@ def get_pending_jobs():
     conn.close()
     return jobs
 
+def get_recent_jobs(limit=10):
+    conn = sqlite3.connect(JOBS_DB)
+    conn.row_factory = sqlite3.Row
+    jobs = conn.execute("SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
+    conn.close()
+    return [dict(j) for j in jobs]
+
 def update_job_status(job_id: str, status: str, result: Any = None, error: str = None):
     conn = sqlite3.connect(JOBS_DB)
     now = datetime.now(timezone.utc).isoformat()
@@ -181,13 +189,20 @@ class HexClawDaemon:
         chat_id = os.getenv("TELEGRAM_CHAT_ID")
         
         register_enqueue(enqueue_job)
-        register_status(lambda: []) # Placeholder
+        register_status(get_recent_jobs)
         register_orchestrate(self.orchestrate)
 
         if token and chat_id:
             self.notifier = Notifier(token, int(chat_id))
             await self.notifier.send("🦾 HexClaw Daemon Online (v1.0)")
+            
+            # Start Telegram Bot
             asyncio.create_task(tg_module.run_bot_async())
+            
+            # Start Monitor
+            m = monitor.get_monitor(notifier=self.notifier)
+            asyncio.create_task(m.run())
+            log.info("Threat Monitor active.")
         else:
             log.warning("Telegram not configured. Running in terminal-only mode.")
 
