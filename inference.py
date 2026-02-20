@@ -51,11 +51,15 @@ except ImportError:
     LITELLM_AVAILABLE = False
 
 # ── Database ──────────────────────────────────────────────────────────────────
+_db_ready = False
+
 def init_db():
+    """Create token_log table if it doesn't exist.  Safe to call multiple times."""
+    global _db_ready
+    if _db_ready:
+        return
     DATA_DIR.mkdir(exist_ok=True)
     conn = sqlite3.connect(TOKEN_LOG_DB)
-    # Ensure fresh schema during development if needed
-    # conn.execute("DROP TABLE IF EXISTS token_log")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS token_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,11 +74,16 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+    _db_ready = True
 
-init_db()
+def _ensure_db():
+    """Lazily initialise the token log DB on first write/read."""
+    if not _db_ready:
+        init_db()
 
 def log_tokens(provider: str, model: str, tier: str, tokens_in: int, tokens_out: int, cost: float = 0.0):
     try:
+        _ensure_db()
         conn = sqlite3.connect(TOKEN_LOG_DB)
         conn.execute(
             "INSERT INTO token_log (provider, model, tier, tokens_in, tokens_out, cost, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -139,6 +148,7 @@ class InferenceEngine:
         return asyncio.run(self.ask(prompt, complexity))
 
 def usage_report() -> dict:
+    _ensure_db()
     conn = sqlite3.connect(TOKEN_LOG_DB)
     conn.row_factory = sqlite3.Row
     stats = conn.execute("""

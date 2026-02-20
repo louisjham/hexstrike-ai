@@ -77,7 +77,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-init_db()
+
 
 # ── Job Lifecycle ─────────────────────────────────────────────────────────────
 class JobStatus:
@@ -211,6 +211,7 @@ class HexClawDaemon:
         return await enqueue_job(skill, params)
 
     async def start(self):
+        init_db()
         header_text = "HexClaw Daemon v1.0 Starting"
         log.info(header_text)
         
