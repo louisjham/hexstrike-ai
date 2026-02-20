@@ -18,3 +18,14 @@
 2026-02-20 02:16:48,155 [hexclaw.monitor] WARNING: Failed to fetch feed https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml: No module named 'httpx'
 2026-02-20 02:16:48,155 [hexclaw.monitor] WARNING: Failed to fetch feed https://www.exploit-db.com/rss.xml: No module named 'httpx'
 2026-02-20 02:16:48,155 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold
+2026-02-20 02:54:54,499 [hexclaw.data] ERROR: Data query failed: Parser Error: syntax error at or near "Error"
+
+LINE 1: Error: litellm.AuthenticationError: AuthenticationError...
+        ^
+2026-02-20 02:54:54,855 [hexclaw.data] INFO: Stored 0 rows to C:\antigravity\hexstrike-ai\data\test_findings.parquet
+2026-02-20 02:56:12,071 [hexclaw.data] ERROR: Data query failed: Parser Error: syntax error at or near "Error"
+
+LINE 1: Error: litellm.AuthenticationError: AuthenticationError...
+        ^
+2026-02-20 02:56:12,088 [hexclaw.data] INFO: Stored 1 rows to C:\antigravity\hexstrike-ai\data\test_findings.parquet
+2026-02-20 02:56:30,918 [hexclaw.data] INFO: Stored 1 rows to C:\antigravity\hexstrike-ai\data\test_findings.parquet

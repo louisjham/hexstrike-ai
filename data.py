@@ -14,7 +14,6 @@ PRD compliance:
 import logging
 import os
 import sqlite3
-from pathlib import Path
 from typing import Any, List, Optional
 
 import duckdb
@@ -28,9 +27,7 @@ load_dotenv()
 log = logging.getLogger("hexclaw.data")
 
 # ── Config ────────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent.resolve()
-DATA_DIR = ROOT / "data"
-DATA_DIR.mkdir(exist_ok=True)
+from config import DATA_DIR, JOBS_DB
 
 # ── Engines ───────────────────────────────────────────────────────────────────
 _duck = duckdb.connect(':memory:')
@@ -59,20 +56,25 @@ async def query(prompt: str) -> pd.DataFrame:
     # 1. Get Schema (simplified for v1.0)
     schema = "Tables: jobs(id, skill, target, status), token_log(provider, model, cost)" 
     
-    # 2. Text-to-SQL
-    sql_prompt = f"Convert this request to a DuckDB SQL query. Only respond with the SQL.\nSchema: {schema}\nRequest: {prompt}"
-    sql = await inference.ask(sql_prompt, complexity="med", system="You are a SQL expert. Output ONLY valid DuckDB SQL.")
+    # 2. Text-to-SQL or Direct SQL
+    if any(keyword in prompt.upper() for keyword in ["SELECT ", "WITH ", "DESCRIBE "]):
+        sql = prompt
+    else:
+        sql_prompt = f"Convert this request to a DuckDB SQL query. Only respond with the SQL.\nSchema: {schema}\nRequest: {prompt}"
+        sql = await inference.ask(sql_prompt, complexity="med", system="You are a SQL expert. Output ONLY valid DuckDB SQL.")
     
-    # Clean SQL if LLM included backticks
+    # Clean SQL if LLM included backticks or returned an error message
     sql = sql.replace("```sql", "").replace("```", "").strip()
+    if sql.startswith("Error:"):
+        log.error(f"LLM returned error instead of SQL: {sql}")
+        return pd.DataFrame()
     
-    log.info(f"Executing Text-to-SQL: {sql}")
+    log.info(f"Executing SQL: {sql}")
     
     # 3. Execute
     try:
-        # We need to ensure we can see the jobs database. 
-        # For simplicity in v1.0, we attach the SQLite jobs DB to DuckDB.
-        from daemon import JOBS_DB
+        # JOBS_DB imported from config at module level
+        _duck.execute("INSTALL sqlite; LOAD sqlite;")
         _duck.execute(f"ATTACH IF NOT EXISTS '{JOBS_DB}' AS main_jobs (TYPE SQLITE)")
         
         df = _duck.query(sql).to_df()

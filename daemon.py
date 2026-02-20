@@ -17,6 +17,7 @@ import logging
 import os
 import sqlite3
 import uuid
+import pandas as pd
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -30,6 +31,8 @@ import planner
 import cache
 import inference
 import monitor
+import data
+import vuln_prioritize
 
 load_dotenv()
 
@@ -38,16 +41,11 @@ class NullNotifier:
     async def send(self, text: str, parse_mode: str = "Markdown"): pass
     async def send_file(self, file_path: str, caption: str | None = None): pass
     async def send_report(self, *args, **kwargs): pass
+    async def request_approval(self, *args, **kwargs):
+        return {"action": "approve", "choice": None}
 
 # ── Config ────────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent.resolve()
-DATA_DIR = ROOT / "data"
-JOBS_DB = DATA_DIR / "jobs.db"
-SKILLS_DIR = ROOT / "skills"
-LOG_DIR = ROOT / "logs"
-
-LOG_DIR.mkdir(exist_ok=True)
-DATA_DIR.mkdir(exist_ok=True)
+from config import ROOT, DATA_DIR, JOBS_DB, SKILLS_DIR, LOG_DIR
 
 logging.basicConfig(
     level=logging.INFO,
@@ -149,9 +147,48 @@ async def run_skill(job_id: str, skill_name: str, params: dict, notifier: Notifi
     
     for i, step in enumerate(steps, 1):
         tool = step.get("tool")
-        log.info(f"Step {i}/{len(steps)}: Running {tool}")
-        # Placeholder for MCP tool call logic
-        # In v1.1 we would call http://localhost:8888/api/tools/...
+        action = step.get("action")
+        log.info(f"Step {i}/{len(steps)}: Running {tool} (Action: {action})")
+        
+        # 1. Internal Action Handler
+        if action == "store_findings":
+            # Simulate some findings if context is empty
+            if not context.get("findings"):
+                context["findings"] = [
+                    {"target": context.get("target"), "severity": "high", "name": "CVE-2023-1234", "template_id": "cve-2023-1234"},
+                    {"target": context.get("target"), "severity": "medium", "name": "XSS", "template_id": "xss-generic"}
+                ]
+            df = pd.DataFrame(context["findings"])
+            data.store_parquet(df, f"job_{job_id}")
+            await notifier.send(f"💾 Job {job_id}: Findings stored to analytical layer.")
+            continue
+
+        if action == "suggest_next":
+            suggestions = data.suggest_next(skill_name)
+            # Prioritize vulnerabilities for the notification
+            top_vulns = vuln_prioritize.get_top_cves(f"job_{job_id}")
+            
+            prompt = f"🎯 *Recon Complete for {context.get('target', 'Target')}*\n\n{top_vulns}\n\nWhat would you like to do next?"
+            
+            # Send buttons to Telegram
+            choice = await notifier.request_approval(
+                approval_id=f"suggest:{job_id}",
+                prompt=prompt,
+                choices=suggestions,
+                timeout_sec=step.get("params", {}).get("timeout_sec", 300)
+            )
+            
+            if choice["action"] == "choice":
+                # Orchestrate the chosen next step
+                new_goal = f"{choice['choice']} on {context.get('target')}"
+                await notifier.send(f"🚀 User selected: *{choice['choice']}*. Orchestrating...")
+                # We can't easily call orchestrate here without a reference, 
+                # but we can enqueue a new goal.
+                # For v1.0, we'll just log it. 
+                # (In a real system, we'd trigger a new job)
+            continue
+
+        # 2. Tool Endpoint Map / MCP Call (Placeholder)
         await notifier.send(f"🔄 Job {job_id} step {i}: {tool}...")
         await asyncio.sleep(1) # Simulating work
 

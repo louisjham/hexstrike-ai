@@ -108,10 +108,14 @@ steps:
       # Exclude templates that produce excessive false positives
       exclude_tags: "dos,fuzzing"
 
-  # ── Step 7: Rule-based suggest_next (0 inference) ─────────────────────────
-  # This is an internal step — daemon.py handles it without an MCP call.
-  # It reads all_findings accumulated from previous steps and generates
-  # Telegram inline keyboard buttons for operator to choose next action.
+  # ── Step 7: Finalize Data ──────────────────────────────────────────────────
+  - tool: data_store
+    description: "Save all findings to Parquet for persistence and analytics"
+    action: store_findings
+    params:
+      dataset: "recon_results"
+
+  # ── Step 8: Rule-based suggest_next ───────────────────────────────────────
   - tool: suggest_next
     description: "Present Telegram inline buttons for operator-chosen next step"
     action: suggest_next

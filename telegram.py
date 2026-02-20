@@ -59,7 +59,7 @@ log = logging.getLogger("hexclaw.telegram")
 # Config
 # ─────────────────────────────────────────────────────────────────────────────
 
-ROOT = Path(__file__).parent.resolve()
+from config import ROOT, TOKEN_LOG_DB
 BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 ALLOWED_CHAT_ID: int | None = int(os.getenv("TELEGRAM_CHAT_ID", "0")) or None
 
@@ -124,13 +124,21 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return await _unauthorized(update)
 
     text = (
-        "🦾 *HexClaw Commands*\n\n"
-        "`/orchestrate <goal>` — Plan and run a workflow from a goal\n"
-        "`/recon <target>` — Run full recon chain\n"
-        "`/status` — Queue and inference usage\n"
-        "`/stats` — Detailed inference dashboard\n"
+        "📧 *Email Commands*\n"
+        "`/email_sort <domain>` — Sort & label emails\n"
+        "`/new_inbox <purpose>` — Create alias monitor\n"
+        "`/reply <msg_id> <content>` — Draft a reply with approval\n"
+        "\n"
+        "📊 *Data Commands*\n"
+        "`/status` — Queue + Data Summary\n"
+        "`/data <query>` — Natural language SQL query\n"
+        "`/stats` — Inference usage dashboard\n"
+        "\n"
+        "🛠 *Execution*\n"
+        "`/orchestrate <goal>` — Plan and run goal\n"
+        "`/recon <target>` — Full recon chain\n"
         "`/cancel <job_id>` — Cancel a job\n"
-        "`/help` — Show this message"
+        "`/help` — Show help"
     )
     await update.message.reply_text(text, parse_mode="Markdown")
 
@@ -184,6 +192,7 @@ async def cmd_orchestrate(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
     import planner
     import yaml
+    import data
     
     # 1. Generate plan
     plan = planner.plan_goal(goal)
@@ -193,6 +202,12 @@ async def cmd_orchestrate(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     plan_text = f"🤖 *Goal:* {goal}\n\n"
     plan_text += f"🛠 *Planned Skill:* `{skill}`\n"
     plan_text += f"📦 *Parameters:*\n```yaml\n{yaml.dump(params)}```\n"
+    
+    # Add data-driven suggestions
+    suggestions = data.suggest_next(skill)
+    if suggestions:
+        plan_text += "💡 *Suggestions:* " + ", ".join(suggestions) + "\n\n"
+        
     plan_text += "Proceed with orchestration?"
     
     # 2. Ask for approval
@@ -245,13 +260,17 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         return
 
     try:
-        # Get jobs and usage stats
+        import data
+        
+        # 1. Get raw jobs from callback
         jobs = _status_callback()
+        
+        # 2. Get rich summary from data.py (DuckDB)
+        rich_summary = await data.get_summary_df()
         
         # Build message
         lines = ["📊 *System Status*"]
         
-        # 1. Job Queue
         lines.append("\n📋 *Active Queue:*")
         if not jobs:
             lines.append("  _No active jobs_")
@@ -261,7 +280,10 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
                 icon = icons.get(j['status'], "❓")
                 lines.append(f"  {icon} `{j['id']}` {j['skill']} ({j['target']})")
         
-        # 2. Summarised Usage (Short)
+        lines.append("\n📈 *Recent Activity (Analytics):*")
+        lines.append(f"```\n{rich_summary}\n```")
+        
+        # 3. Summarised Usage (Short)
         try:
             import inference
             usage = inference.usage_report()
@@ -275,6 +297,99 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     except Exception as exc:
         await update.message.reply_text(f"❌ Error fetching status: {exc}")
 
+async def cmd_email_sort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not _is_allowed(update):
+        return await _unauthorized(update)
+    if not context.args:
+        return await update.message.reply_text("Usage: `/email_sort <domain>`")
+    
+    domain = context.args[0]
+    msg = await update.message.reply_text(f"📧 Sorting emails for `{domain}`...")
+    
+    try:
+        from email.m365 import M365Engine
+        engine = M365Engine()
+        results = engine.classify_and_label(domain)
+        if not results:
+            await msg.edit_text(f"📭 No emails found for `{domain}`.")
+        else:
+            text = f"✅ Classified {len(results)} emails for `{domain}`:\n"
+            for r in results:
+                text += f"• `{r['id']}` → `{r['label']}`\n"
+            await msg.edit_text(text)
+    except Exception as e:
+        await msg.edit_text(f"❌ Email sort failed: {e}")
+
+async def cmd_new_inbox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not _is_allowed(update):
+        return await _unauthorized(update)
+    if not context.args:
+        return await update.message.reply_text("Usage: `/new_inbox <purpose>`")
+    
+    purpose = context.args[0]
+    try:
+        from email.gmail import new_inbox
+        alias = new_inbox(purpose)
+        await update.message.reply_text(f"🛰 *Alias Monitor Active*\nCreated tracking for: `{alias}`\nPurpose: _{purpose}_")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Failed to create monitor: {e}")
+
+async def cmd_reply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not _is_allowed(update):
+        return await _unauthorized(update)
+    if len(context.args) < 2:
+        return await update.message.reply_text("Usage: `/reply <msg_id> <content>`")
+    
+    msg_id = context.args[0]
+    content = " ".join(context.args[1:])
+    
+    # 1. Ask for approval
+    approval_id = f"reply:{os.urandom(4).hex()}"
+    prompt = f"✉️ *Drafting Reply*\nTo message: `{msg_id}`\nContent: _{content}_\n\nApprove draft?"
+    
+    res = await request_approval(
+        bot=context.bot,
+        chat_id=update.effective_chat.id,
+        approval_id=approval_id,
+        prompt=prompt
+    )
+    
+    if res["action"] == "approve":
+        try:
+            from email.m365 import M365Engine
+            engine = M365Engine()
+            draft_id = engine.draft_reply(msg_id, content)
+            await update.message.reply_text(f"✅ Draft created! ID: `{draft_id}`")
+        except Exception as e:
+            await update.message.reply_text(f"❌ Drafting failed: {e}")
+    else:
+        await update.message.reply_text("🚫 Draft aborted.")
+
+async def cmd_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Natural language data query command."""
+    if not _is_allowed(update):
+        return await _unauthorized(update)
+
+    if not context.args:
+        return await update.message.reply_text("Usage: `/data <natural language query>`")
+
+    prompt = " ".join(context.args)
+    msg = await update.message.reply_text(f"🔍 Querying: `{prompt}`...")
+
+    try:
+        import data
+        df = await data.query(prompt)
+        if df.empty:
+            await msg.edit_text("📭 No results or query failed.")
+        else:
+            summary = df.to_markdown(index=False)
+            # Cap summary for Telegram
+            if len(summary) > 3000:
+                summary = summary[:3000] + "\n\n...[truncated]"
+            await msg.edit_text(f"📊 *Query Results*\n```\n{summary}\n```", parse_mode="Markdown")
+    except Exception as e:
+        await msg.edit_text(f"❌ Query error: {e}")
+
 
 async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Zero-inference stats — reads SQLite token log directly."""
@@ -283,7 +398,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     import sqlite3
 
-    db_path = ROOT / "data" / "token_log.db"
+    db_path = TOKEN_LOG_DB
     if not db_path.exists():
         await update.message.reply_text("📊 No token log found yet.")
         return
@@ -657,6 +772,10 @@ def build_application() -> "Application":
     app.add_handler(CommandHandler("recon", cmd_recon))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("stats", cmd_stats))
+    app.add_handler(CommandHandler("data", cmd_data))
+    app.add_handler(CommandHandler("email_sort", cmd_email_sort))
+    app.add_handler(CommandHandler("new_inbox", cmd_new_inbox))
+    app.add_handler(CommandHandler("reply", cmd_reply))
     app.add_handler(CommandHandler("cancel", cmd_cancel))
     app.add_handler(CallbackQueryHandler(_handle_callback))
 

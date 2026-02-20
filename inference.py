@@ -15,7 +15,6 @@ import os
 import sqlite3
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
@@ -27,9 +26,7 @@ load_dotenv()
 log = logging.getLogger("hexclaw.inference")
 
 # ── Config ────────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent.resolve()
-DATA_DIR = ROOT / "data"
-TOKEN_LOG_DB = DATA_DIR / "token_log.db"
+from config import DATA_DIR, TOKEN_LOG_DB
 
 # Providers
 PROVIDERS = {
@@ -158,8 +155,8 @@ def usage_report() -> dict:
 # Singleton instance
 engine = InferenceEngine()
 
-async def ask(prompt: str, complexity: str = "low") -> str:
-    return await engine.ask(prompt, complexity)
+async def ask(prompt: str, complexity: str = "low", system: str = "You are HexClaw.") -> str:
+    return await engine.ask(prompt, complexity, system)
 
 if __name__ == "__main__":
     import json

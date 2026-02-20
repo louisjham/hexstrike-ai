@@ -36,7 +36,6 @@ import os
 import re
 import sys
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
@@ -49,9 +48,7 @@ log = logging.getLogger("hexclaw.monitor")
 # Config
 # ─────────────────────────────────────────────────────────────────────────────
 
-ROOT = Path(__file__).parent.resolve()
-LOG_DIR = ROOT / "logs"
-LOG_DIR.mkdir(exist_ok=True)
+from config import LOG_DIR
 
 logging.basicConfig(
     level=logging.INFO,
