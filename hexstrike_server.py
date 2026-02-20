@@ -12100,6 +12100,592 @@ def masscan():
             "retryable": True
         }), 500
 
+# ============================================================================
+# US MASSCAN VULNERABILITY RECONNAISSANCE PIPELINE
+# ============================================================================
+
+# ARIN delegation statistics URL for fetching US IPv4 CIDRs
+ARIN_DELEGATION_URL = "https://ftp.arin.net/pub/stats/arin/delegated-arin-extended-latest"
+
+# Application → port/fingerprint registry for automatic resolution
+APP_PORT_REGISTRY = {
+    "ollama":        {"port": 11434, "filter": "Ollama",        "fp_path": "/api/tags",     "fp_match": "models"},
+    "jupyter":       {"port": 8888,  "filter": "Jupyter",       "fp_path": "/api/status",   "fp_match": "started"},
+    "gradio":        {"port": 7860,  "filter": "Gradio",        "fp_path": "/info",         "fp_match": "gradio"},
+    "redis":         {"port": 6379,  "filter": "Redis",         "fp_path": None,            "fp_match": "REDIS"},
+    "elasticsearch": {"port": 9200,  "filter": "Elasticsearch", "fp_path": "/",             "fp_match": "lucene"},
+    "couchdb":       {"port": 5984,  "filter": "CouchDB",       "fp_path": "/",             "fp_match": "couchdb"},
+    "minio":         {"port": 9000,  "filter": "MinIO",         "fp_path": "/minio/health/live", "fp_match": None},
+    "mongodb":       {"port": 27017, "filter": "MongoDB",       "fp_path": None,            "fp_match": None},
+    "memcached":     {"port": 11211, "filter": "Memcached",     "fp_path": None,            "fp_match": None},
+    "etcd":          {"port": 2379,  "filter": "etcd",          "fp_path": "/version",      "fp_match": "etcdserver"},
+    "k8s-api":       {"port": 6443,  "filter": "Kubernetes",    "fp_path": "/version",      "fp_match": "gitVersion"},
+    "docker-api":    {"port": 2375,  "filter": "Docker",        "fp_path": "/version",      "fp_match": "ApiVersion"},
+    "prometheus":    {"port": 9090,  "filter": "Prometheus",    "fp_path": "/-/healthy",    "fp_match": "OK"},
+    "grafana":       {"port": 3000,  "filter": "Grafana",       "fp_path": "/api/health",   "fp_match": "ok"},
+    "openwebui":     {"port": 8080,  "filter": "Open WebUI",    "fp_path": "/",             "fp_match": "open webui"},
+    "kibana":        {"port": 5601,  "filter": "Kibana",        "fp_path": "/api/status",   "fp_match": "kibana"},
+    "jenkins":       {"port": 8080,  "filter": "Jenkins",       "fp_path": "/",             "fp_match": "jenkins"},
+    "gitlab":        {"port": 80,    "filter": "GitLab",        "fp_path": "/",             "fp_match": "gitlab"},
+    "rabbitmq":      {"port": 15672, "filter": "RabbitMQ",      "fp_path": "/api/overview",  "fp_match": "rabbitmq"},
+    "consul":        {"port": 8500,  "filter": "Consul",        "fp_path": "/v1/status/leader", "fp_match": None},
+}
+
+# Well-known banner fingerprints that indicate potential vulnerabilities
+BANNER_VULN_SIGNATURES = {
+    # Web servers with known old/vuln versions
+    "Apache/2.2": {"severity": "high", "title": "Apache 2.2.x (EOL) — Multiple CVEs", "cves": ["CVE-2017-9798", "CVE-2017-7679"]},
+    "Apache/2.4.49": {"severity": "critical", "title": "Apache 2.4.49 Path Traversal + RCE", "cves": ["CVE-2021-41773"]},
+    "Apache/2.4.50": {"severity": "critical", "title": "Apache 2.4.50 Path Traversal + RCE", "cves": ["CVE-2021-42013"]},
+    "nginx/1.0": {"severity": "high", "title": "nginx 1.0.x (EOL) — Multiple CVEs", "cves": ["CVE-2013-2028"]},
+    "nginx/1.2": {"severity": "high", "title": "nginx 1.2.x (EOL)", "cves": []},
+    "Microsoft-IIS/6.0": {"severity": "critical", "title": "IIS 6.0 WebDAV RCE", "cves": ["CVE-2017-7269"]},
+    "Microsoft-IIS/7.0": {"severity": "high", "title": "IIS 7.0 (EOL)", "cves": []},
+    "Microsoft-IIS/7.5": {"severity": "medium", "title": "IIS 7.5 (EOL)", "cves": []},
+    "OpenSSH_7.": {"severity": "medium", "title": "OpenSSH 7.x — User Enumeration", "cves": ["CVE-2018-15473"]},
+    "OpenSSH_6.": {"severity": "high", "title": "OpenSSH 6.x (EOL)", "cves": ["CVE-2016-6515"]},
+    "OpenSSH_8.": {"severity": "low", "title": "OpenSSH 8.x — Minor Issues", "cves": []},
+    "OpenSSH_9.8": {"severity": "critical", "title": "OpenSSH 9.8 regreSSHion RCE", "cves": ["CVE-2024-6387"]},
+    "vsftpd 2.3.4": {"severity": "critical", "title": "vsftpd 2.3.4 Backdoor", "cves": ["CVE-2011-2523"]},
+    "ProFTPD 1.3.3": {"severity": "critical", "title": "ProFTPD 1.3.3c Backdoor", "cves": ["CVE-2010-4221"]},
+    "Exim 4.87": {"severity": "critical", "title": "Exim 4.87 RCE", "cves": ["CVE-2019-10149"]},
+    "Exim 4.89": {"severity": "critical", "title": "Exim 4.89 RCE", "cves": ["CVE-2019-10149"]},
+    "MiniServ/1.": {"severity": "high", "title": "Webmin MiniServ — Known RCEs", "cves": ["CVE-2019-15107"]},
+}
+
+# Insecure HTTP header patterns indicating misconfigurations
+INSECURE_HEADER_PATTERNS = {
+    "missing_hsts": {"severity": "medium", "title": "Missing Strict-Transport-Security header"},
+    "missing_csp": {"severity": "medium", "title": "Missing Content-Security-Policy header"},
+    "missing_xframe": {"severity": "low", "title": "Missing X-Frame-Options header"},
+    "server_disclosure": {"severity": "low", "title": "Server version disclosed in headers"},
+    "directory_listing": {"severity": "medium", "title": "Directory listing potentially enabled"},
+    "default_page": {"severity": "info", "title": "Default web server page detected"},
+}
+
+
+def fetch_us_cidrs(max_cidrs: int = 50) -> list:
+    """
+    Fetch US IPv4 CIDR blocks from ARIN's official delegation statistics.
+    Returns a list of CIDR strings like ['1.2.3.0/24', ...].
+    """
+    import ipaddress
+
+    cidrs = []
+    try:
+        logger.info(f"🇺🇸 Fetching US CIDRs from ARIN delegation stats (max: {max_cidrs})")
+        response = requests.get(ARIN_DELEGATION_URL, timeout=60, stream=True)
+        response.raise_for_status()
+
+        for line in response.iter_lines(decode_unicode=True):
+            if len(cidrs) >= max_cidrs:
+                break
+            if not line or line.startswith('#'):
+                continue
+            parts = line.split('|')
+            # Format: registry|cc|type|start|value|date|status[|extensions]
+            if len(parts) >= 7 and parts[1] == 'US' and parts[2] == 'ipv4':
+                try:
+                    start_ip = parts[3]
+                    host_count = int(parts[4])
+                    # Convert host count to prefix length
+                    if host_count > 0:
+                        prefix_len = 32 - int(host_count - 1).bit_length()
+                        cidr = f"{start_ip}/{prefix_len}"
+                        # Validate the CIDR
+                        ipaddress.ip_network(cidr, strict=False)
+                        cidrs.append(cidr)
+                except (ValueError, TypeError):
+                    continue
+
+        logger.info(f"🇺🇸 Fetched {len(cidrs)} US CIDR blocks from ARIN")
+    except Exception as e:
+        logger.error(f"❌ Failed to fetch US CIDRs from ARIN: {str(e)}")
+
+    return cidrs
+
+
+def run_masscan_on_cidrs(cidrs: list, port: int, intensity: str,
+                         enable_banners: bool, service_filter: str,
+                         use_recovery: bool) -> dict:
+    """
+    Run masscan against a list of CIDRs for a specific port.
+    Batches all CIDRs into a single masscan invocation via temp file for speed.
+    Returns dict with 'discovered_ips' (list), 'raw_results' (list of dicts),
+    and 'unconfirmed_ips' (hosts with port open but no banner match when service_filter is set).
+    """
+    import tempfile
+    rate = MASSCAN_INTENSITY_RATES.get(intensity, 1000)
+    all_ips = []
+    raw_results = []
+    unconfirmed_ips = []
+
+    # Write CIDRs to temp file for batch processing (-iL flag)
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, prefix='masscan_cidrs_') as tf:
+            for cidr in cidrs:
+                tf.write(f"{cidr}\n")
+            cidr_list_path = tf.name
+
+        banner_flag = " --banners" if enable_banners else ""
+        command = f"masscan -iL {cidr_list_path} -p{port} --rate={rate}{banner_flag} -oG -"
+        logger.info(f"🚀 Batch masscan: {len(cidrs)} CIDRs, port {port}, rate {rate}pps")
+
+        if use_recovery:
+            result = execute_command_with_recovery("masscan", command, {"target": f"{len(cidrs)}_cidrs"})
+        else:
+            result = execute_command(command, tool_name="masscan")
+
+        stdout = result.get("stdout", "")
+
+        for line in stdout.splitlines():
+            if "open port" in line.lower() or "Discovered" in line:
+                match = re.search(r'(\d+\.\d+\.\d+\.\d+)', line)
+                if match:
+                    ip = match.group(1)
+                    banner = ""
+                    banner_match = re.search(r'banner=(.+?)(?:\s|$)', line)
+                    if banner_match:
+                        banner = banner_match.group(1)
+
+                    entry = {"ip": ip, "port": port, "banner": banner, "cidr_source": "batch"}
+
+                    if service_filter:
+                        if banner and service_filter.lower() in banner.lower():
+                            all_ips.append(ip)
+                            raw_results.append(entry)
+                        else:
+                            # Port is open but banner doesn't match — keep as unconfirmed
+                            entry["status"] = "unconfirmed"
+                            unconfirmed_ips.append(ip)
+                            raw_results.append(entry)
+                    else:
+                        all_ips.append(ip)
+                        raw_results.append(entry)
+
+            elif re.search(r'Discovered.*on\s+(\d+\.\d+\.\d+\.\d+)', line):
+                match = re.search(r'on\s+(\d+\.\d+\.\d+\.\d+)', line)
+                if match:
+                    ip = match.group(1)
+                    entry = {"ip": ip, "port": port, "banner": "", "cidr_source": "batch"}
+                    if service_filter:
+                        entry["status"] = "unconfirmed"
+                        unconfirmed_ips.append(ip)
+                    else:
+                        all_ips.append(ip)
+                    raw_results.append(entry)
+
+    except Exception as e:
+        logger.warning(f"⚠️  Batch masscan failed: {str(e)} — falling back to per-CIDR")
+        # Fallback: scan CIDRs individually
+        for cidr in cidrs:
+            try:
+                banner_flag = " --banners" if enable_banners else ""
+                cmd = f"masscan {cidr} -p{port} --rate={rate}{banner_flag} -oG -"
+                if use_recovery:
+                    result = execute_command_with_recovery("masscan", cmd, {"target": cidr})
+                else:
+                    result = execute_command(cmd, tool_name="masscan")
+                stdout = result.get("stdout", "")
+                for line in stdout.splitlines():
+                    m = re.search(r'(\d+\.\d+\.\d+\.\d+)', line)
+                    if m and ("open port" in line.lower() or "Discovered" in line):
+                        ip = m.group(1)
+                        if not service_filter:
+                            all_ips.append(ip)
+                            raw_results.append({"ip": ip, "port": port, "banner": "", "cidr_source": cidr})
+                        else:
+                            unconfirmed_ips.append(ip)
+                            raw_results.append({"ip": ip, "port": port, "banner": "", "cidr_source": cidr, "status": "unconfirmed"})
+            except Exception:
+                continue
+    finally:
+        try:
+            os.unlink(cidr_list_path)
+        except Exception:
+            pass
+
+    unique_ips = list(set(all_ips))
+    unique_unconfirmed = list(set(unconfirmed_ips) - set(unique_ips))
+
+    return {"discovered_ips": unique_ips, "raw_results": raw_results, "unconfirmed_ips": unique_unconfirmed}
+
+
+def check_host_exposures(ip: str, port: int, banner: str = "", application: str = "") -> list:
+    """
+    Perform lightweight exposure checks on a single discovered host.
+    Now probes HTTP on ALL ports (not just well-known web ports) and performs
+    application-specific fingerprint checks from APP_PORT_REGISTRY.
+    Returns a list of insight dicts.
+    """
+    insights = []
+
+    # 1. Banner-based CVE fingerprinting
+    for sig_pattern, vuln_info in BANNER_VULN_SIGNATURES.items():
+        if sig_pattern.lower() in banner.lower():
+            insights.append({
+                "ip": ip, "port": port,
+                "severity": vuln_info["severity"],
+                "title": vuln_info["title"],
+                "cves": vuln_info.get("cves", []),
+                "source": "banner_fingerprint",
+                "evidence": banner[:200]
+            })
+
+    # 2. HTTP probe on ANY port (many non-standard apps serve HTTP)
+    try:
+        scheme = "https" if port in (443, 8443) else "http"
+        url = f"{scheme}://{ip}:{port}/"
+        resp = requests.get(url, timeout=5, verify=False, allow_redirects=False,
+                            headers={"User-Agent": "HexStrike-AI/6.0 Security-Scanner"})
+
+        headers = resp.headers
+        body_snippet = resp.text[:2000].lower() if resp.text else ""
+
+        # Server version disclosure
+        server_header = headers.get("Server", "")
+        if server_header:
+            insights.append({
+                "ip": ip, "port": port,
+                "severity": "low",
+                "title": f"Server version disclosed: {server_header}",
+                "source": "http_headers",
+                "evidence": server_header
+            })
+            for sig_pattern, vuln_info in BANNER_VULN_SIGNATURES.items():
+                if sig_pattern.lower() in server_header.lower():
+                    insights.append({
+                        "ip": ip, "port": port,
+                        "severity": vuln_info["severity"],
+                        "title": vuln_info["title"],
+                        "cves": vuln_info.get("cves", []),
+                        "source": "http_server_header",
+                        "evidence": server_header
+                    })
+
+        # Missing security headers
+        if "strict-transport-security" not in {k.lower() for k in headers}:
+            insights.append({
+                "ip": ip, "port": port,
+                "severity": "medium", "title": "Missing HSTS header",
+                "source": "http_headers"
+            })
+        if "content-security-policy" not in {k.lower() for k in headers}:
+            insights.append({
+                "ip": ip, "port": port,
+                "severity": "medium", "title": "Missing Content-Security-Policy header",
+                "source": "http_headers"
+            })
+        if "x-frame-options" not in {k.lower() for k in headers}:
+            insights.append({
+                "ip": ip, "port": port,
+                "severity": "low", "title": "Missing X-Frame-Options header",
+                "source": "http_headers"
+            })
+
+        # Default page detection
+        for marker in ["it works!", "apache2 ubuntu default page", "welcome to nginx",
+                       "iis windows server", "test page for the", "apache http server",
+                       "default web site page", "congratulations"]:
+            if marker in body_snippet:
+                insights.append({
+                    "ip": ip, "port": port, "severity": "info",
+                    "title": "Default web server page detected",
+                    "source": "http_body", "evidence": marker
+                })
+                break
+
+        # Open redirect check
+        location = headers.get("Location", "")
+        if location and ("://" in location and ip not in location):
+            insights.append({
+                "ip": ip, "port": port, "severity": "low",
+                "title": f"Redirect to external host: {location[:100]}",
+                "source": "http_redirect"
+            })
+
+        # HTTP title extraction
+        title_match = re.search(r'<title[^>]*>(.*?)</title>', resp.text[:5000], re.IGNORECASE | re.DOTALL)
+        if title_match:
+            title_text = title_match.group(1).strip()[:200]
+            if title_text:
+                insights.append({
+                    "ip": ip, "port": port, "severity": "info",
+                    "title": f"HTTP Title: {title_text}",
+                    "source": "http_title"
+                })
+
+        # 3. Application-specific fingerprint check
+        if application and application in APP_PORT_REGISTRY:
+            app_info = APP_PORT_REGISTRY[application]
+            fp_path = app_info.get("fp_path")
+            fp_match = app_info.get("fp_match")
+            if fp_path:
+                try:
+                    fp_resp = requests.get(f"{scheme}://{ip}:{port}{fp_path}",
+                                           timeout=3, verify=False,
+                                           headers={"User-Agent": "HexStrike-AI/6.0"})
+                    confirmed = False
+                    if fp_match and fp_match.lower() in fp_resp.text.lower():
+                        confirmed = True
+                    elif fp_match is None and fp_resp.status_code < 500:
+                        confirmed = True  # No match pattern → 2xx/3xx/4xx = service present
+                    if confirmed:
+                        insights.append({
+                            "ip": ip, "port": port, "severity": "info",
+                            "title": f"Confirmed {application} instance",
+                            "source": "app_fingerprint",
+                            "evidence": f"{fp_path} → matched"
+                        })
+                except Exception:
+                    pass  # fingerprint check is best-effort
+
+    except requests.exceptions.SSLError:
+        insights.append({
+            "ip": ip, "port": port, "severity": "medium",
+            "title": "SSL/TLS certificate error", "source": "ssl_check"
+        })
+    except requests.exceptions.ConnectionError:
+        pass
+    except requests.exceptions.Timeout:
+        pass
+    except Exception:
+        pass
+
+    return insights
+
+
+@app.route("/api/tools/us-masscan-vuln", methods=["POST"])
+def us_masscan_vuln():
+    """
+    US Masscan Vulnerability Reconnaissance Pipeline.
+
+    Phase 1: Fetch US CIDRs → us_cidrs.txt
+    Phase 2: Masscan port/service scan with banners → ips.txt
+    Phase 3: Exposure/vuln checks → report.json
+    """
+    try:
+        import ipaddress as _ipaddress
+        from collections import Counter
+        params = request.json
+        application = params.get("application", "")
+        port = params.get("port", 80)
+        service_filter = params.get("service_filter", "")
+        cidr_source = params.get("cidr_source", "arin")
+        max_cidrs = params.get("max_cidrs", 50)
+        intensity = params.get("intensity", "normal")
+        enable_banners = params.get("enable_banners", True)
+        vuln_check = params.get("vuln_check", True)
+        output_dir = params.get("output_dir", "./output/us_masscan_vuln")
+        use_recovery = params.get("use_recovery", True)
+
+        # ── Application resolution ────────────────────────────────────────
+        if application:
+            app_key = application.lower().strip()
+            if app_key in APP_PORT_REGISTRY:
+                app_info = APP_PORT_REGISTRY[app_key]
+                port = app_info["port"]
+                service_filter = app_info["filter"]
+                logger.info(f"🎯 App '{application}' resolved → port={port}, filter='{service_filter}'")
+            else:
+                logger.warning(f"⚠️  Application '{application}' not in registry, using manual port={port}")
+
+        # Ensure output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+        cidrs_file = os.path.join(output_dir, "us_cidrs.txt")
+        ips_file = os.path.join(output_dir, "ips.txt")
+        report_file = os.path.join(output_dir, "report.json")
+
+        # ── Phase 1: Fetch US CIDRs ──────────────────────────────────────
+        logger.info(f"🇺🇸 Phase 1: Fetching US CIDRs (source={cidr_source}, max={max_cidrs})")
+
+        if cidr_source == "custom":
+            if os.path.exists(cidrs_file):
+                with open(cidrs_file, "r") as f:
+                    cidrs = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+                cidrs = cidrs[:max_cidrs]
+                logger.info(f"📄 Loaded {len(cidrs)} CIDRs from {cidrs_file}")
+            else:
+                return jsonify({
+                    "status": "error", "error_type": "invalid_input",
+                    "message": f"Custom CIDR file not found: {cidrs_file}",
+                    "retryable": False
+                }), 400
+        else:
+            cidrs = fetch_us_cidrs(max_cidrs)
+
+        if not cidrs:
+            return jsonify({
+                "status": "error", "error_type": "no_data",
+                "message": "No US CIDR blocks could be fetched. Check network connectivity.",
+                "retryable": True
+            }), 500
+
+        # Estimate total IPs in scope
+        total_ips_in_scope = 0
+        for cidr in cidrs:
+            try:
+                total_ips_in_scope += _ipaddress.ip_network(cidr, strict=False).num_addresses
+            except Exception:
+                total_ips_in_scope += 256  # fallback estimate
+
+        with open(cidrs_file, "w") as f:
+            f.write(f"# US CIDR blocks fetched by HexStrike AI\n")
+            f.write(f"# Source: {cidr_source} | Count: {len(cidrs)} | Generated: {datetime.now().isoformat()}\n")
+            for cidr in cidrs:
+                f.write(f"{cidr}\n")
+
+        logger.info(f"✅ Phase 1 complete: {len(cidrs)} CIDRs (~{total_ips_in_scope:,} IPs) → {cidrs_file}")
+
+        # ── Phase 2: Masscan Port Scanning ────────────────────────────────
+        logger.info(f"🔍 Phase 2: Masscan scanning port {port} across {len(cidrs)} CIDRs (intensity={intensity})")
+
+        scan_results = run_masscan_on_cidrs(
+            cidrs=cidrs, port=port, intensity=intensity,
+            enable_banners=enable_banners, service_filter=service_filter,
+            use_recovery=use_recovery
+        )
+
+        discovered_ips = scan_results["discovered_ips"]
+        raw_results = scan_results["raw_results"]
+        unconfirmed_ips = scan_results.get("unconfirmed_ips", [])
+
+        with open(ips_file, "w") as f:
+            for ip in sorted(discovered_ips):
+                f.write(f"{ip}\n")
+
+        logger.info(f"✅ Phase 2 complete: {len(discovered_ips)} confirmed + {len(unconfirmed_ips)} unconfirmed")
+
+        # ── Phase 3: Exposure / Vulnerability Checks ──────────────────────
+        all_insights = []
+
+        if vuln_check and discovered_ips:
+            logger.info(f"🔬 Phase 3: Checking {len(discovered_ips)} hosts for exposures/vulnerabilities")
+
+            banner_lookup = {}
+            for entry in raw_results:
+                if entry.get("banner"):
+                    banner_lookup[entry["ip"]] = entry["banner"]
+
+            for ip in discovered_ips:
+                banner = banner_lookup.get(ip, "")
+                host_insights = check_host_exposures(ip, port, banner, application=application)
+                all_insights.extend(host_insights)
+
+            logger.info(f"✅ Phase 3 complete: {len(all_insights)} insights from {len(discovered_ips)} hosts")
+        elif not vuln_check:
+            logger.info(f"⏩ Phase 3 skipped (vuln_check=False)")
+
+        # ── Compile Report ────────────────────────────────────────────────
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
+        for insight in all_insights:
+            sev = insight.get("severity", "info")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        # Top findings — the most actionable, deduplicated
+        top_findings = []
+        crits_highs = [i for i in all_insights if i.get("severity") in ("critical", "high")]
+        if crits_highs:
+            top_findings.append(f"{len(crits_highs)} critical/high severity issues found across {len(set(i['ip'] for i in crits_highs))} hosts")
+        confirmed_apps = [i for i in all_insights if i.get("source") == "app_fingerprint"]
+        if confirmed_apps:
+            top_findings.append(f"{len(confirmed_apps)} confirmed {application or 'service'} instances discovered")
+        if discovered_ips:
+            hit_rate = len(discovered_ips) / max(total_ips_in_scope, 1) * 100
+            top_findings.append(f"Port {port} open on {len(discovered_ips)} hosts ({hit_rate:.4f}% hit rate across ~{total_ips_in_scope:,} IPs)")
+        if unconfirmed_ips:
+            top_findings.append(f"{len(unconfirmed_ips)} hosts with port open but service unconfirmed (may need manual verification)")
+
+        # Insight aggregation — group similar titles and count occurrences
+        title_counter = Counter(i.get("title", "") for i in all_insights)
+        aggregated_insights = [
+            {"title": title, "count": count, "severity": next((i["severity"] for i in all_insights if i.get("title") == title), "info")}
+            for title, count in title_counter.most_common(15)
+        ]
+
+        # Recommended next steps
+        recommended_next_steps = []
+        if severity_counts["critical"] > 0:
+            recommended_next_steps.append("URGENT: Investigate critical findings immediately — these may be actively exploitable")
+        if severity_counts["high"] > 0:
+            recommended_next_steps.append("Run targeted Nmap service version detection (-sV) on high-severity hosts for deeper analysis")
+        if confirmed_apps:
+            recommended_next_steps.append(f"Perform authenticated checks on confirmed {application or 'service'} instances for misconfigurations")
+        if discovered_ips:
+            recommended_next_steps.append("Cross-reference discovered IPs with Shodan/Censys for historical context")
+        if unconfirmed_ips:
+            recommended_next_steps.append(f"HTTP probe the {len(unconfirmed_ips)} unconfirmed hosts to verify service identity")
+        if not recommended_next_steps:
+            recommended_next_steps.append("No significant findings — consider broadening the scan scope (increase max_cidrs)")
+
+        # Dynamic confidence
+        confidence = 0.5
+        if discovered_ips:
+            confidence += 0.15  # we found hosts
+        if all_insights:
+            confidence += 0.10  # we got real insights
+        if enable_banners:
+            confidence += 0.10  # banner data improves accuracy
+        if confirmed_apps:
+            confidence += 0.10  # fingerprint-confirmed
+        if vuln_check:
+            confidence += 0.05  # deeper checks run
+        confidence = min(confidence, 0.98)
+
+        report = {
+            "status": "success",
+            "pipeline": "us-masscan-vuln",
+            "application": application or "(none)",
+            "port": port,
+            "service_filter": service_filter or "(none)",
+            "cidr_source": cidr_source,
+            "total_cidrs_scanned": len(cidrs),
+            "hosts_checked": total_ips_in_scope,
+            "hosts_open": len(discovered_ips),
+            "hosts_unconfirmed": len(unconfirmed_ips),
+            "intensity": intensity,
+            "banners_enabled": enable_banners,
+            "vuln_check_enabled": vuln_check,
+            "severity_summary": severity_counts,
+            "top_findings": top_findings,
+            "insight_aggregation": aggregated_insights,
+            "recommended_next_steps": recommended_next_steps,
+            "insights": all_insights[:100],  # cap to avoid bloated response
+            "artifacts": {
+                "us_cidrs_file": cidrs_file,
+                "ips_file": ips_file,
+                "report_file": report_file
+            },
+            "execution_cost": {"low": "low", "normal": "medium", "high": "high"}.get(intensity, "medium"),
+            "data_source": "masscan + http_fingerprint",
+            "confidence": round(confidence, 2)
+        }
+
+        import json as json_module
+        with open(report_file, "w") as f:
+            json_module.dump(report, f, indent=2, default=str)
+
+        logger.info(
+            f"📊 US Masscan Vuln report: {len(discovered_ips)} hosts, "
+            f"{len(all_insights)} insights "
+            f"(C:{severity_counts['critical']} H:{severity_counts['high']} "
+            f"M:{severity_counts['medium']} L:{severity_counts['low']} I:{severity_counts['info']})"
+        )
+
+        return jsonify(report)
+
+    except Exception as e:
+        logger.error(f"💥 Error in us-masscan-vuln endpoint: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "status": "error",
+            "error_type": "server_error",
+            "message": f"Pipeline error: {str(e)}",
+            "retryable": True
+        }), 500
+
 @app.route("/api/tools/nmap-advanced", methods=["POST"])
 def nmap_advanced():
     """Execute advanced Nmap scans with custom NSE scripts and optimized timing"""

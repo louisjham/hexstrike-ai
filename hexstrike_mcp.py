@@ -435,6 +435,182 @@ def setup_mcp_server(hexstrike_client: HexStrikeClient) -> FastMCP:
         return result
 
     # ============================================================================
+    # US MASSCAN VULNERABILITY RECONNAISSANCE TOOL
+    # ============================================================================
+
+    @mcp.tool()
+    def us_masscan_vuln(
+        application: str = "",
+        port: int = 80,
+        service_filter: str = "",
+        cidr_source: str = "arin",
+        max_cidrs: int = 50,
+        intensity: str = "normal",
+        enable_banners: bool = True,
+        vuln_check: bool = True,
+        output_dir: str = "./output/us_masscan_vuln",
+        use_recovery: bool = True
+    ) -> Dict[str, Any]:
+        """
+        US Internet-Wide Reconnaissance Pipeline — Automated CIDR acquisition, mass port scanning,
+        banner/HTTP-title fingerprinting, and vulnerability exposure reporting for United States IP space.
+
+        ═══════════════════════════════════════════════════════════════════
+        WHEN TO USE THIS TOOL (call this tool if the user's request matches ANY of these):
+        ═══════════════════════════════════════════════════════════════════
+          • "Scan US IP ranges for [service/port]"
+          • "Find all [Apache/nginx/IIS/OpenSSH/etc.] servers in the US"
+          • "What US hosts have port [22/80/443/3389/etc.] open?"
+          • "Check US internet for vulnerable [service]"
+          • "Mass scan American IP space"
+          • "Find exposed [service] across US CIDRs"
+          • "US internet exposure report"
+          • "ARIN CIDR scan" or "scan ARIN ranges"
+          • Any request combining: (US / American / ARIN) + (scan / recon / find / discover)
+          • Any request for internet-wide or country-wide port scanning focused on the US
+          • When the user wants to discover hosts running a specific service across US IP space
+          • When the user wants a vulnerability exposure report for US-facing infrastructure
+
+        ═══════════════════════════════════════════════════════════════════
+        APPLICATION / SERVICE HUNTING (this is a KEY use case — call this tool):
+        ═══════════════════════════════════════════════════════════════════
+          This tool is ideal when a user names a SPECIFIC APPLICATION or SERVICE and wants to
+          find many instances of it running on the internet for security research. This is
+          especially common for newer, emerging, or recently-vulnerable software that may not
+          have established PoCs or CVE coverage yet. The user typically knows the port or you
+          can infer it from the application name.
+
+          Trigger patterns:
+          • "Find me a bunch of [Ollama/OpenWebUI/Gradio/etc.] instances"
+          • "I heard [service X] has security holes, it runs on port [N], find me some"
+          • "Scan for exposed [application] on port [N]"
+          • "Find open [Ollama/Jupyter/MinIO/Redis/etc.] ports and investigate"
+          • "That new service [name] is vulnerable, find me targets to test"
+          • "How many [CouchDB/Elasticsearch/Kibana/etc.] instances are exposed?"
+          • "Hunt for [application] across the internet"
+          • Any request where the user names an application + wants bulk discovery
+
+          IMPORTANT: When the user names an application, set the 'application' parameter
+          to the app name (e.g. application='ollama'). Do NOT manually set port or
+          service_filter — the server resolves them automatically from its registry.
+
+          Supported application names (case-insensitive):
+            ollama, jupyter, gradio, redis, elasticsearch, couchdb, minio, mongodb,
+            memcached, etcd, k8s-api, docker-api, prometheus, grafana, openwebui,
+            kibana, jenkins, gitlab, rabbitmq, consul
+
+          If the application is NOT in the list, set port manually and use service_filter.
+          If the user doesn't specify US, still use this tool — it defaults to US/ARIN ranges
+          and is the best tool for "find me a bunch of X on the internet" style requests.
+
+        ═══════════════════════════════════════════════════════════════════
+        DO NOT USE THIS TOOL WHEN:
+        ═══════════════════════════════════════════════════════════════════
+          • The user wants to scan a SPECIFIC known target IP or hostname → use nmap_scan instead
+          • The user wants to scan a single CIDR or subnet they already have → use masscan_high_speed
+          • The user wants non-US IP ranges (e.g. EU, APNIC, RIPE) → this tool only covers ARIN/US
+          • The user only wants subdomain enumeration → use subfinder or amass
+          • The user wants web vulnerability scanning (SQLi, XSS) → use nuclei_scan
+
+        ═══════════════════════════════════════════════════════════════════
+        HOW IT DIFFERS FROM OTHER SCANNING TOOLS:
+        ═══════════════════════════════════════════════════════════════════
+          • nmap_scan: Scans a single target in depth (service versions, OS detection, scripts)
+          • masscan_high_speed: Scans user-provided targets/CIDRs at high speed (raw port scan)
+          • us_masscan_vuln: END-TO-END PIPELINE that fetches US CIDRs automatically, mass scans
+            them, fingerprints banners, checks HTTP headers, and generates a vulnerability report.
+            This is the only tool that handles the full lifecycle from CIDR acquisition to vuln report.
+
+        ═══════════════════════════════════════════════════════════════════
+        OUTPUT ARTIFACTS:
+        ═══════════════════════════════════════════════════════════════════
+          • us_cidrs.txt  — The CIDR ranges fetched from ARIN delegation data.
+          • ips.txt       — One IP per line for every host with the target port open.
+          • report.json   — Structured report (hosts_checked, hosts_open, severity_summary, insights[]).
+
+        Args:
+            application: Name of a specific application to hunt for (e.g. 'ollama', 'jupyter',
+                'redis', 'grafana'). When set, port and service_filter are auto-resolved from
+                the server's APP_PORT_REGISTRY. Overrides manual port/service_filter values.
+                PREFERRED over manually setting port — just pass the app name.
+            port: The TCP port to scan across all US CIDRs (default 80). Only set this manually
+                if 'application' is not used. Common: 22, 80, 443, 3389, 8080, 3306, 27017.
+            service_filter: Optional banner/HTTP-title substring filter. Auto-set when 'application'
+                is used. Only set manually for custom filtering.
+            cidr_source: 'arin' (live ARIN fetch, default) or 'custom' (pre-existing us_cidrs.txt).
+            max_cidrs: Max CIDR blocks to scan (default 50). Lower=faster, higher=broader.
+            intensity: 'low' (~100pps), 'normal' (~1000pps), 'high' (~10000pps).
+            enable_banners: Grab service banners (default True). Required for service identification.
+            vuln_check: Run exposure checks on discovered hosts (default True).
+            output_dir: Output directory for us_cidrs.txt, ips.txt, report.json.
+            use_recovery: Enable intelligent retries (default True).
+        """
+        data = {
+            "application": application,
+            "port": port,
+            "service_filter": service_filter,
+            "cidr_source": cidr_source,
+            "max_cidrs": max_cidrs,
+            "intensity": intensity,
+            "enable_banners": enable_banners,
+            "vuln_check": vuln_check,
+            "output_dir": output_dir,
+            "use_recovery": use_recovery
+        }
+        logger.info(
+            f"{HexStrikeColors.FIRE_RED}🇺🇸 Initiating US Masscan Vuln pipeline: "
+            f"port={port}, intensity={intensity}, max_cidrs={max_cidrs}"
+            f"{HexStrikeColors.RESET}"
+        )
+
+        result = hexstrike_client.safe_post("api/tools/us-masscan-vuln", data)
+
+        if result.get("status") == "success":
+            hosts_open = result.get("hosts_open", 0)
+            hosts_checked = result.get("hosts_checked", 0)
+            logger.info(
+                f"{HexStrikeColors.SUCCESS}✅ US Masscan Vuln pipeline complete — "
+                f"{hosts_open}/{hosts_checked} hosts with port {port} open"
+                f"{HexStrikeColors.RESET}"
+            )
+
+            insights = result.get("insights", [])
+            if insights:
+                for insight in insights[:5]:
+                    severity = insight.get("severity", "info").upper()
+                    if severity == "CRITICAL":
+                        color = HexStrikeColors.CRITICAL
+                    elif severity == "HIGH":
+                        color = HexStrikeColors.FIRE_RED
+                    elif severity == "MEDIUM":
+                        color = HexStrikeColors.CYBER_ORANGE
+                    else:
+                        color = HexStrikeColors.NEON_BLUE
+                    logger.info(
+                        f"{color}  [{severity}] {insight.get('title', 'N/A')}{HexStrikeColors.RESET}"
+                    )
+
+            if result.get("recovery_info", {}).get("recovery_applied"):
+                attempts = result["recovery_info"].get("attempts_made", 1)
+                logger.info(
+                    f"{HexStrikeColors.HIGHLIGHT_YELLOW} Recovery applied: "
+                    f"{attempts} attempts made {HexStrikeColors.RESET}"
+                )
+        else:
+            logger.error(
+                f"{HexStrikeColors.ERROR}❌ US Masscan Vuln pipeline failed"
+                f"{HexStrikeColors.RESET}"
+            )
+
+            if result.get("human_escalation"):
+                logger.error(
+                    f"{HexStrikeColors.CRITICAL} HUMAN ESCALATION REQUIRED "
+                    f"{HexStrikeColors.RESET}"
+                )
+
+        return result
+
+    # ============================================================================
     # CLOUD SECURITY TOOLS
     # ============================================================================
 
