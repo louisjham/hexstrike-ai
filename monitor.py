@@ -481,9 +481,8 @@ async def _summarise_alert(alert: Alert) -> str | None:
         # Free-tier LLM call (low cost, may be rate-limited)
         summary = await inference.ask(
             prompt=prompt,
-            tier="free",
-            temperature=0.1,
-            max_tokens=128,
+            complexity="low",
+            system="You are a concise security alert summariser. Respond with ONE sentence only.",
         )
         return summary.strip()
 

@@ -433,21 +433,21 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     lines = ["📊 *Inference Usage Dashboard*\n"]
     for row in rows[:10]:
-        provider, model, calls, tok_in, tok_out, cost, cache_hits = row
+        provider, model, calls, tok_in, tok_out, cost = row
         cost_str = f"${cost:.4f}" if cost else "$0.0000"
         lines.append(
             f"• `{model}` ({provider})\n"
             f"  {calls} calls · {tok_in or 0}↑ {tok_out or 0}↓ tokens · "
-            f"{cost_str} · {cache_hits or 0} cache hits"
+            f"{cost_str}"
         )
 
     if totals:
-        calls, tok_in, tok_out, cost, cache_hits = totals
+        calls, tok_in, tok_out, cost = totals
         cost_str = f"${cost:.4f}" if cost else "$0.0000"
         lines.append(
             f"\n*Totals*: {calls} calls · "
             f"{tok_in or 0}↑ {tok_out or 0}↓ tokens · "
-            f"{cost_str} · {cache_hits or 0} cache hits"
+            f"{cost_str}"
         )
 
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
