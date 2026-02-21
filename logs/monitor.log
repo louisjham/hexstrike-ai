@@ -782,3 +782,6 @@ Did you mean "main_jobs.jobs"?
 2026-02-21 05:20:52,538 [hexclaw.planner] INFO: Using LLM planner (litellm + Gemini available)
 2026-02-21 05:20:52,538 [hexclaw.planner] INFO: Extracted target: unknown
 2026-02-21 05:20:52,540 [hexclaw.planner] INFO: No rule matched → default skill: agent_plan
+2026-02-21 05:34:02,305 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 0 sent, 188 dedup-skipped, 202 below-threshold
+2026-02-21 05:44:40,032 [asyncio] ERROR: Task was destroyed but it is pending!
+task: <Task pending name='Task-2' coro=<run_bot_async() running at /mnt/c/antigravity/hexstrike-ai/tg_bot.py:820> wait_for=<Future pending cb=[Task.task_wakeup()]>>

@@ -133,18 +133,34 @@ async def run_skill(job_id: str, skill_name: str, params: dict, notifier: Notifi
     log.info(f"[Job {job_id}] Skill dispatch: {skill_name} → {target}")
     update_job_status(job_id, JobStatus.RUNNING)
     
-    skill_file = SKILLS_DIR / f"{skill_name}.yaml"
-    if not skill_file.exists():
-        err = f"Skill {skill_name} not found at {skill_file}"
-        log.error(f"[Job {job_id}] {err}")
-        update_job_status(job_id, JobStatus.FAILED, error=err)
-        await notifier.send(f"❌ Job {job_id} failed: {err}")
-        return
-
-    with open(skill_file, "r") as f:
-        skill_def = yaml.safe_load(f)
-
-    steps = skill_def.get("steps", [])
+    if skill_name == "awesome_skill_execution":
+        steps = [{
+            "tool": "awesome_skill", 
+            "action": "execute_awesome_skill",
+            "params": {
+                "goal": params.get("goal"), 
+                "skill_name": params.get("skill_name"), 
+                "skill_content": params.get("skill_content")
+            }
+        }]
+    else:
+        skill_file = SKILLS_DIR / f"{skill_name}.yaml"
+        if not skill_file.exists():
+            err = f"Skill {skill_name} not found at {skill_file}"
+            log.error(f"[Job {job_id}] {err}")
+            update_job_status(job_id, JobStatus.FAILED, error=err)
+            return
+            
+        try:
+            with open(skill_file, "r") as f:
+                skill_def = yaml.safe_load(f)
+            steps = skill_def.get("steps", [])
+        except Exception as e:
+            err = f"Failed to parse skill {skill_name}: {e}"
+            log.error(f"[Job {job_id}] {err}")
+            update_job_status(job_id, JobStatus.FAILED, error=err)
+            return
+    
     log.info(f"[Job {job_id}] Loaded skill '{skill_name}' with {len(steps)} steps")
     context = params.copy()
     
@@ -155,6 +171,35 @@ async def run_skill(job_id: str, skill_name: str, params: dict, notifier: Notifi
         log.info(f"[Job {job_id}] Step {i}/{len(steps)}: tool={tool} action={action}")
         
         # 1. Internal Action Handler
+        if action == "execute_awesome_skill":
+            goal = step_params.get("goal", "No goal provided")
+            skill_n = step_params.get("skill_name", "unknown_skill")
+            content = step_params.get("skill_content", "")
+            
+            log.info(f"[Job {job_id}] Executing Awesome Skill: {skill_n} for goal: {goal}")
+            await notifier.send(f"🌟 Executing Awesome Skill: *{skill_n}*\nGoal: {goal}")
+            
+            import coder
+            # Inject the markdown instructions into the prompt for the autonomous coder
+            prompt = f"Goal: {goal}\n\nYou MUST use the following expert instructions to accomplish this goal:\n\n{content}"
+            result = await coder.code_and_run(prompt)
+            
+            context["awesome_skill_output"] = result
+            await notifier.send(f"✅ Awesome Skill Execution Complete:\n```\n{result[:3000]}\n```")
+            continue
+
+        if action == "generate_and_run_code":
+            goal = context.get(step.get("input", "goal"), "No goal provided")
+            log.info(f"[Job {job_id}] Coding to achieve goal: {goal}")
+            await notifier.send(f"🤖 Generating code for: {goal}")
+            
+            import coder
+            result = await coder.code_and_run(f"Write a script for the following goal: {goal}")
+            
+            context[step.get("output", "code_output")] = result
+            await notifier.send(f"✅ Code Execution Complete:\n```\n{result[:3000]}\n```")
+            continue
+
         if action == "store_findings":
             log.info(f"[Job {job_id}] Storing findings to analytical layer")
             # Simulate some findings if context is empty

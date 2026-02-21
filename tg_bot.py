@@ -148,11 +148,55 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "\n"
         "🛠 *Execution*\n"
         "`/orchestrate <goal>` — Plan and run goal\n"
+        "`/skills [category]` — List available Agentic Skills\n"
         "`/recon <target>` — Full recon chain\n"
         "`/cancel <job_id>` — Cancel a job\n"
         "`/help` — Show help"
     )
     await update.effective_message.reply_text(text, parse_mode="Markdown")
+
+
+async def cmd_skills(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not _is_allowed(update):
+        return await _unauthorized(update)
+
+    args = context.args
+    skills_cat = awesome_skills.get_skills_by_category()
+    
+    if not args:
+        # Show Categories
+        text = "🗂️ *Available Skill Bundles*\n\n"
+        for cat, skills in sorted(skills_cat.items()):
+            text += f"• `{cat}` ({len(skills)} skills)\n"
+        text += "\n_Use `/skills <category>` to view specific commands._"
+        # Truncate if somehow we still hit limits
+        if len(text) > 4000:
+            text = text[:4000] + "...\n[Truncated]"
+        await update.effective_message.reply_text(text, parse_mode="Markdown")
+        return
+
+    # Show Specific Skills in Category
+    cat_name = args[0].lower().strip()
+    if cat_name not in skills_cat:
+        await update.effective_message.reply_text(f"❌ Category `{cat_name}` not found.\nUse `/skills` to see all bundles.", parse_mode="Markdown")
+        return
+
+    text = f"🛠️ *Skills in bundle: {cat_name}*\n\n"
+    for skill in sorted(skills_cat[cat_name], key=lambda x: x['name']):
+        desc = skill['description'][:100] + "..." if len(skill['description']) > 100 else skill['description']
+        # Escape markdown chars in description
+        desc_safe = desc.replace('_', '\\_').replace('*', '\\*').replace('`', '\\`')
+        text += f"• `@{(skill['name'])}` - {desc_safe}\n"
+    
+    # Telegram max message length is 4096. 
+    # If the category has too many skills, we must split it.
+    if len(text) <= 4000:
+        await update.effective_message.reply_text(text, parse_mode="Markdown")
+    else:
+        # Quick split for very large categories
+        parts = [text[i:i+4000] for i in range(0, len(text), 4000)]
+        for part in parts:
+            await update.effective_message.reply_text(part, parse_mode="Markdown")
 
 
 async def cmd_recon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -782,6 +826,7 @@ def build_application() -> "Application":
     app.add_handler(CommandHandler("start", cmd_help))
     app.add_handler(CommandHandler("orchestrate", cmd_orchestrate))
     app.add_handler(CommandHandler("edit", cmd_edit))
+    app.add_handler(CommandHandler("skills", cmd_skills))
     app.add_handler(CommandHandler("recon", cmd_recon))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("stats", cmd_stats))

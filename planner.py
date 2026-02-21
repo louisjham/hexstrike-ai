@@ -17,6 +17,9 @@ try:
 except ImportError:
     litellm = None
 
+# Import awesome_skills for dynamic planning
+import awesome_skills
+
 log = logging.getLogger("hexclaw.planner")
 
 def plan_goal(goal: str) -> dict[str, Any]:
@@ -31,12 +34,37 @@ def plan_goal(goal: str) -> dict[str, Any]:
     """
     log.info("Planning goal: '%s'", goal)
     
+    # ── 1. Check for Explicit @skill-name Invocation ──
+    import re
+    match = re.search(r"@([a-zA-Z0-9_-]+)", goal)
+    if match:
+        skill_name = match.group(1)
+        log.info(f"Explicit skill requested via @ syntax: {skill_name}")
+        awesome_match = awesome_skills.get_skill_by_name(skill_name)
+        if awesome_match:
+            # Extract target if possible
+            domain_match = re.search(r'([a-z0-9]+(-[a-z0-9]+)*\.)+([a-z]{2,})', goal.lower())
+            target = domain_match.group(0) if domain_match else "unknown"
+            
+            return {
+                "skill": "awesome_skill_execution",
+                "params": {
+                    "target": target,
+                    "goal": goal,
+                    "skill_name": awesome_match["name"],
+                    "skill_content": awesome_match["raw_content"]
+                }
+            }
+        else:
+            log.warning(f"Requested skill '@{skill_name}' not found in Awesome Skills index. Proceeding with standard planning.")
+
+    # ── 2. Standard LLM Planning (if available) ──
     # If API keys are available and litellm is installed, try LLM planning
     if litellm and os.getenv("GOOGLE_API_KEY"):
         log.info("Using LLM planner (litellm + Gemini available)")
         return _plan_with_llm(goal)
     
-    # Fallback: Rule-based planning
+    # ── 3. Fallback: Rule-based planning ──
     log.info("Using rule-based planner (no LLM available)")
     return _plan_with_rules(goal)
 
@@ -64,6 +92,14 @@ def _plan_with_rules(goal: str) -> dict[str, Any]:
             "skill": "dev_ops",
             "params": {"target": target, "action": "clone_and_test"}
         }
+        
+    # Coding / Scripting
+    if any(kw in goal_lower for kw in ["code", "script", "app", "write", "python"]):
+        log.info("Rule match → skill: autonomous_coder")
+        return {
+            "skill": "autonomous_coder",
+            "params": {"target": target, "goal": goal}
+        }
     
     # OSINT / Social
     if any(kw in goal_lower for kw in ["breach", "social", "darkweb", "email"]):
@@ -75,10 +111,23 @@ def _plan_with_rules(goal: str) -> dict[str, Any]:
     
     # Default: agent_plan (generic)
     log.info("No rule matched → default skill: agent_plan")
-    return {
-        "skill": "agent_plan",
-        "params": {"target": target, "goal": goal}
-    }
+    
+    # Fallback: Check Awesome Skills
+    log.info(f"No built-in rule matched. Searching Awesome Skills for: {goal}")
+    awesome_match = awesome_skills.find_relevant_skill(goal)
+    if awesome_match:
+        log.info(f"Awesome Skill match found: {awesome_match['name']}")
+        return {
+            "skill": "awesome_skill_execution", # We will handle this dynamically in the daemon
+            "params": {
+                "target": target, 
+                "goal": goal,
+                "skill_name": awesome_match["name"],
+                "skill_content": awesome_match["raw_content"]
+            }
+        }
+        
+    return {"skill": "agent_plan", "params": {"target": target, "goal": goal}}
 
 def _plan_with_llm(goal: str) -> dict[str, Any]:
     """

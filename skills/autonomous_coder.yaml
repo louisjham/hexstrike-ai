@@ -1,0 +1,8 @@
+name: autonomous_coder
+description: Autonomous local code generation and execution
+steps:
+  - action: "generate_and_run_code"
+    description: "Write a python script and execute it to solve the goal"
+    input: "goal"
+    output: "code_output"
+    notify: "always"
