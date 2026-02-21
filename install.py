@@ -894,6 +894,24 @@ def setup_env():
             f.write(f"{k}={v}\n")
     ok(".env file created.")
 
+    # Clone Awesome Skills
+    header("Step 2.5: Downloading Awesome Agentic Skills")
+    skills_dir = ROOT / ".agent" / "skills"
+    if skills_dir.exists():
+        ok("Awesome Skills repository already exists. Skipping clone.")
+    else:
+        try:
+            print(f"    {CYAN}Cloning sickn33/antigravity-awesome-skills...{RESET}")
+            subprocess.check_call(
+                ["git", "clone", "https://github.com/sickn33/antigravity-awesome-skills.git", str(skills_dir)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            ok("Awesome Skills downloaded successfully.")
+        except Exception as e:
+            warn(f"Failed to clone Awesome Skills: {e}")
+            print(f"    {YELLOW}You can manually clone it later to {skills_dir}{RESET}")
+
 def setup_services():
     header("Step 3: Service Registration")
     is_linux = platform.system() == "Linux"
