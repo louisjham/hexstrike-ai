@@ -49,7 +49,7 @@ sudo systemctl enable postgresql --now
 
 # Kali meta-packages (the tools HexStrike wraps)
 sudo apt install -y kali-tools-top10     # nmap, sqlmap, hydra, etc.
-sudo apt install -y amass subfinder httpx-toolkit nuclei masscan ffuf
+sudo apt install -y amass subfinder httpx-toolkit nuclei masscan ffuf rustscan
 ```
 
 ### 2.1 Verify Key Tools

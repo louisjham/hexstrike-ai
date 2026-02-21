@@ -1,77 +1,18 @@
-#!/usr/bin/env python3
-"""
-HexClaw install.py
-==================
-Bootstraps everything needed to run the HexClaw autonomous agent:
-  1. Python pip dependencies (litellm, redis, telegram, duckdb, msgraph, google-api)
-  2. .env configuration (Telegram, AI keys, Email/App passwords)
-  3. Database setup (PostgreSQL + Redis)
-  4. System service registration (systemd/Windows)
-"""
-
-import os
-import sys
-import shutil
-import platform
-import subprocess
-import argparse
-import textwrap
-from pathlib import Path
-
-# ── Constants ─────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent.resolve()
-ENV_FILE = ROOT / ".env"
-REQUIREMENTS = [
-    "litellm",
-    "redis",
-    "python-telegram-bot",
-    "temp-mails",
-    "psycopg2-binary",
-    "duckdb",
-    "msgraph-sdk",
-    "google-api-python-client",
-    "python-dotenv",
-    "pyyaml"
-]
-
-BOLD = "\033[1m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-CYAN = "\033[36m"
-RESET = "\033[0m"
-
-def ok(msg): print(f"  {GREEN}[+]{RESET} {msg}")
-def warn(msg): print(f"  {YELLOW}[?]{RESET}  {msg}")
-def err(msg): print(f"  {RED}[X]{RESET} {msg}")
-def header(msg): print(f"\n{BOLD}{CYAN}== {msg} =={RESET}")
-
-# ── Steps ─────────────────────────────────────────────────────────────────────
-
-def install_system_tools():
-    header("Step 0: Verify and Install System Tools")
-    if platform.system() != "Linux":
-        warn("Not a Linux system. Skipping OS-level tool installation.")
-        return
-
-    choice = input(f"  {YELLOW}[?]{RESET} Run the HexStrike tool installation verification script? [y/N]: ").strip().lower()
-    if choice == 'y':
-        print("Running tool verification and installation script...")
-        script_content = r"""#!/bin/bash
+#!/bin/bash
 
 # HexStrike AI - Official Tools Verification Script (Based on Official README)
 # Supports multiple Linux distributions with verified download links
 # Version 3.5 - Complete coverage of all 70+ HexStrike AI tools
 
-RED='[0;31m'
-GREEN='[0;32m'
-YELLOW='[1;33m'
-BLUE='[0;34m'
-MAGENTA='[0;35m'
-CYAN='[0;36m'
-WHITE='[1;37m'
-ORANGE='[0;33m'
-NC='[0m' # No Color
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+ORANGE='\033[0;33m'
+NC='\033[0m' # No Color
 
 # Banner
 echo -e "${CYAN}"
@@ -452,38 +393,28 @@ generate_verified_install_commands() {
                 "go_install")
                     echo -e "${BLUE}🔍 Verifying Go package: $install_info${NC}"
                     if check_url "https://$install_info"; then
-                        GO_TOOLS+="
-  go install -v $install_info@latest"
+                        GO_TOOLS+="\n  go install -v $install_info@latest"
                         echo -e "  ✅ ${GREEN}Verified${NC}"
                     else
-                        GO_TOOLS+="
-  go install -v $install_info@latest  # ⚠️  Could not verify"
+                        GO_TOOLS+="\n  go install -v $install_info@latest  # ⚠️  Could not verify"
                         echo -e "  ⚠️  ${YELLOW}Could not verify URL${NC}"
                     fi
                     ;;
                 
                 "pip_install")
-                    PIP_TOOLS+="
-  pip3 install $install_info"
+                    PIP_TOOLS+="\n  pip3 install $install_info"
                     ;;
                 
                 "github_release")
                     echo -e "${BLUE}🔍 Verifying GitHub release: $install_info${NC}"
                     if check_url "$install_info"; then
-                        GITHUB_RELEASES+="
-# $tool - $description
-wget $install_info
-"
+                        GITHUB_RELEASES+="\n# $tool - $description\nwget $install_info\n"
                         echo -e "  ✅ ${GREEN}Download link verified${NC}"
                     else
                         # Try to find working alternative
                         local base_url=$(echo "$install_info" | sed 's|/releases/latest/download/.*|/releases|')
-                        GITHUB_RELEASES+="
-# $tool - $description
-# ⚠️  Direct link failed, visit: $base_url
-"
-                        FAILED_VERIFICATIONS+="
-❌ $tool: $install_info"
+                        GITHUB_RELEASES+="\n# $tool - $description\n# ⚠️  Direct link failed, visit: $base_url\n"
+                        FAILED_VERIFICATIONS+="\n❌ $tool: $install_info"
                         echo -e "  ❌ ${RED}Download link failed - check manually${NC}"
                     fi
                     ;;
@@ -491,20 +422,11 @@ wget $install_info
                 "github_manual")
                     echo -e "${BLUE}🔍 Verifying GitHub repo: $install_info${NC}"
                     if check_url "$install_info"; then
-                        MANUAL_INSTALLS+="
-# $tool - $description
-git clone $install_info
-cd $(basename $install_info)
-# Follow installation instructions in README
-"
+                        MANUAL_INSTALLS+="\n# $tool - $description\ngit clone $install_info\ncd $(basename $install_info)\n# Follow installation instructions in README\n"
                         echo -e "  ✅ ${GREEN}Repository verified${NC}"
                     else
-                        MANUAL_INSTALLS+="
-# $tool - $description
-# ⚠️  Repository URL failed: $install_info
-"
-                        FAILED_VERIFICATIONS+="
-❌ $tool: $install_info"
+                        MANUAL_INSTALLS+="\n# $tool - $description\n# ⚠️  Repository URL failed: $install_info\n"
+                        FAILED_VERIFICATIONS+="\n❌ $tool: $install_info"
                         echo -e "  ❌ ${RED}Repository not accessible${NC}"
                     fi
                     ;;
@@ -512,19 +434,11 @@ cd $(basename $install_info)
                 "manual_download")
                     echo -e "${BLUE}🔍 Verifying manual download: $install_info${NC}"
                     if check_url "$install_info"; then
-                        MANUAL_INSTALLS+="
-# $tool - $description
-# Download from: $install_info
-# Extract and follow installation instructions
-"
+                        MANUAL_INSTALLS+="\n# $tool - $description\n# Download from: $install_info\n# Extract and follow installation instructions\n"
                         echo -e "  ✅ ${GREEN}Download page verified${NC}"
                     else
-                        MANUAL_INSTALLS+="
-# $tool - $description
-# ⚠️  Download page failed: $install_info
-"
-                        FAILED_VERIFICATIONS+="
-❌ $tool: $install_info"
+                        MANUAL_INSTALLS+="\n# $tool - $description\n# ⚠️  Download page failed: $install_info\n"
+                        FAILED_VERIFICATIONS+="\n❌ $tool: $install_info"
                         echo -e "  ❌ ${RED}Download page not accessible${NC}"
                     fi
                     ;;
@@ -582,8 +496,7 @@ cd $(basename $install_info)
     if [ -n "$FAILED_VERIFICATIONS" ]; then
         echo -e "${RED}⚠️  Failed Link Verifications:${NC}"
         echo -e "$FAILED_VERIFICATIONS"
-        echo -e "
-${YELLOW}💡 For failed links, please check the official project repositories manually.${NC}"
+        echo -e "\n${YELLOW}💡 For failed links, please check the official project repositories manually.${NC}"
         echo ""
     fi
     
@@ -850,108 +763,4 @@ echo "🔗 Project Page: https://www.hexstrike.com"
 echo "👨‍💻 Author: 0x4m4 (https://www.0x4m4.com)"
 echo ""
 echo -e "${WHITE}🤖 Ready to empower your AI agents with autonomous cybersecurity capabilities!${NC}"
-echo """""
-        script_path = "/tmp/hexstrike_install_tools.sh"
-        try:
-            with open(script_path, "w", encoding="utf-8") as f:
-                f.write(script_content)
-            os.chmod(script_path, 0o755)
-            subprocess.check_call(["bash", script_path])
-            ok("Tool verification script finished.")
-        except Exception as e:
-            err(f"Tool script failed: {e}")
-        finally:
-            if os.path.exists(script_path):
-                os.remove(script_path)
-
-def install_deps():
-    header("Step 1: Install Dependencies")
-    print(f"Installing: {', '.join(REQUIREMENTS)}...")
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade"] + REQUIREMENTS)
-        ok("All dependencies installed.")
-    except Exception as e:
-        err(f"Dependency install failed: {e}")
-
-def setup_env():
-    header("Step 2: .env Configuration")
-    if ENV_FILE.exists():
-        warn(".env already exists. Skipping overwrite.")
-        return
-
-    config = {
-        "TELEGRAM_BOT_TOKEN": input(f"    {BOLD}TELEGRAM_BOT_TOKEN{RESET}: "),
-        "TELEGRAM_CHAT_ID": input(f"    {BOLD}TELEGRAM_CHAT_ID{RESET}: "),
-        "GOOGLE_API_KEY": input(f"    {BOLD}GOOGLE_API_KEY (Gemini){RESET}: "),
-        "APP_EMAIL": input(f"    {BOLD}APP_EMAIL (Gmail/M365){RESET}: "),
-        "APP_EMAIL_PASS": input(f"    {BOLD}APP_EMAIL_PASS{RESET}: "),
-        "POSTGRES_DSN": "postgresql://hexclaw:hexclaw@localhost:5432/hexclaw",
-        "REDIS_URL": "redis://localhost:6379/0"
-    }
-
-    with open(ENV_FILE, "w") as f:
-        for k, v in config.items():
-            f.write(f"{k}={v}\n")
-    ok(".env file created.")
-
-def setup_services():
-    header("Step 3: Service Registration")
-    is_linux = platform.system() == "Linux"
-    if is_linux:
-        service_path = Path("/etc/systemd/system/hexclaw.service")
-        content = textwrap.dedent(f"""\
-            [Unit]
-            Description=HexClaw Agent
-            After=network.target redis.service postgresql.service
-
-            [Service]
-            ExecStart={sys.executable} {ROOT}/daemon.py
-            WorkingDirectory={ROOT}
-            Restart=always
-            EnvironmentFile={ENV_FILE}
-
-            [Install]
-            WantedBy=multi-user.target
-        """)
-        try:
-            # Note: This usually requires sudo to write to /etc
-            with open(ROOT / "hexclaw.service", "w") as f:
-                f.write(content)
-            ok(f"systemd unit written to {ROOT}/hexclaw.service (copy to /etc/systemd/system/)")
-        except Exception as e:
-            warn(f"Could not write service file: {e}")
-    else:
-        ok("Windows detected: Please use NSSM or Task Scheduler to run daemon.py.")
-
-def check_infra():
-    header("Step 4: Infrastructure Check")
-    if shutil.which("redis-cli"): ok("Redis detected.")
-    else: warn("Redis not found in PATH.")
-    if shutil.which("psql"): ok("PostgreSQL detected.")
-    else: warn("PostgreSQL not found in PATH.")
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action="store_true")
-    args = parser.parse_args()
-
-    print(f"\n{BOLD}{CYAN}# HexClaw Orchestrator Installation{RESET}")
-    if args.dry_run:
-        header("Dry Run Mode")
-        ok("System dependencies check skipped.")
-        ok("Dependencies check skipped.")
-        ok(".env would be created.")
-        ok("Infrastructure would be checked.")
-        ok("Services would be registered.")
-        return
-
-    install_system_tools()
-    install_deps()
-    setup_env()
-    check_infra()
-    setup_services()
-    header("Setup Complete")
-    print(f"Run {BOLD}python daemon.py{RESET} to start.")
-
-if __name__ == "__main__":
-    main()
+echo ""
