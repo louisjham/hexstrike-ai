@@ -14,6 +14,7 @@ ROOT = Path(__file__).parent.resolve()
 DATA_DIR = ROOT / "data"
 LOG_DIR = ROOT / "logs"
 SKILLS_DIR = ROOT / "skills"
+WORKSPACE_DIR = DATA_DIR / "workspace"
 
 JOBS_DB = DATA_DIR / "jobs.db"
 TOKEN_LOG_DB = DATA_DIR / "token_log.db"
@@ -21,3 +22,4 @@ TOKEN_LOG_DB = DATA_DIR / "token_log.db"
 # ── Ensure directories exist on first import ──────────────────────────────────
 DATA_DIR.mkdir(exist_ok=True)
 LOG_DIR.mkdir(exist_ok=True)
+WORKSPACE_DIR.mkdir(exist_ok=True)

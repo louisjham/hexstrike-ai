@@ -79,7 +79,7 @@ pip install -r requirements.txt
 
 # HexClaw agent deps (not in requirements.txt)
 pip install litellm python-telegram-bot redis duckdb \
-            psycopg2-binary python-dotenv pyyaml pandas httpx
+            psycopg2-binary python-dotenv pyyaml pandas httpx pyarrow feedparser
 ```
 
 > **Tip:** Run `python install.py` for an interactive setup if you prefer a wizard.

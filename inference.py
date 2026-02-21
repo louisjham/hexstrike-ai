@@ -30,17 +30,17 @@ from config import DATA_DIR, TOKEN_LOG_DB
 
 # Providers
 PROVIDERS = {
-    "google_pro": "gemini/gemini-2.0-flash-exp", # Updated to Flash 2.0 per request
-    "z_ai": "zhipuai/glm-4", # Common Z.AI model
-    "openrouter": "openrouter/ibm/granite-3.1-8b-instruct", # IBM Granite per request
+    "google_pro": "gemini/gemini-2.0-flash-exp",
+    "z_ai": "openai/glm-4.7", # Routing through Z.ai's OpenAI-compatible API
+    "openrouter": "openrouter/ibm/granite-3.1-8b-instruct",
     "free": "ollama/llama3"
 }
 
 # Tiers
 TIERS = {
     "high": [PROVIDERS["google_pro"], PROVIDERS["openrouter"]],
-    "med":  [PROVIDERS["openrouter"], PROVIDERS["z_ai"]],
-    "low":  [PROVIDERS["free"], PROVIDERS["z_ai"]]
+    "med":  [PROVIDERS["z_ai"], PROVIDERS["openrouter"]],
+    "low":  [PROVIDERS["z_ai"], PROVIDERS["free"]]
 }
 
 try:
@@ -115,6 +115,18 @@ class InferenceEngine:
 
         model = self.select_model(complexity)
         log.info(f"LLM call: model={model} tier={complexity} prompt_len={len(prompt)}")
+        
+        # ── Provider specific logic ───────────────────────────────────────────
+        kwargs = {}
+        if "openai/" in model and "glm" in model:
+            # Special routing for Z.ai OpenAI-compatible endpoint
+            kwargs["api_base"] = "https://api.z.ai/api/coding/paas/v4"
+            kwargs["api_key"] = os.getenv("ZHIPUAI_API_KEY")
+        elif "anthropic/" in model and "glm" in model:
+            # Fallback/alternative routing through Z.ai's Anthropic endpoint
+            kwargs["api_base"] = "https://api.z.ai/api/anthropic"
+            kwargs["api_key"] = os.getenv("ZHIPUAI_API_KEY")
+
         try:
             response = await litellm.acompletion(
                 model=model,
@@ -122,14 +134,17 @@ class InferenceEngine:
                     {"role": "system", "content": system},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=2048
+                max_tokens=2048,
+                **kwargs
             )
             
             text = response.choices[0].message.content
             usage = response.usage
-            cost = getattr(response, "_hidden_params", {}).get("response_cost", 0.0)
+            u_in = getattr(usage, "prompt_tokens", 0) or 0
+            u_out = getattr(usage, "completion_tokens", 0) or 0
+            cost = getattr(response, "_hidden_params", {}).get("response_cost") or 0.0
             
-            log.info(f"LLM response: {usage.prompt_tokens}↑ {usage.completion_tokens}↓ tokens · ${cost:.4f} · {len(text)} chars")
+            log.info(f"LLM response: {u_in}↑ {u_out}↓ tokens · ${float(cost):.4f} · {len(text)} chars")
             
             # ── Store in cache ────────────────────────────────────────────────
             cache.set(f"{system}\n\n{prompt}", text)

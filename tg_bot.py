@@ -1,6 +1,6 @@
 """
-HexClaw — telegram.py
-=====================
+HexClaw — tg_bot.py
+==================
 Telegram bot hub for the HexClaw autonomous agent.
 
 Responsibilities:
@@ -50,10 +50,19 @@ try:
     TELEGRAM_AVAILABLE = True
 except ImportError:
     TELEGRAM_AVAILABLE = False
+    # Define stubs to avoid NameErrors
+    Bot = None
+    InlineKeyboardButton = None
+    InlineKeyboardMarkup = None
+    Update = None
+    Application = None
+    CallbackQueryHandler = None
+    CommandHandler = None
+    ContextTypes = None
 
 load_dotenv()
 
-log = logging.getLogger("hexclaw.telegram")
+log = logging.getLogger("hexclaw.tg_bot")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Config
@@ -114,7 +123,7 @@ def _is_allowed(update: Update) -> bool:
 
 async def _unauthorized(update: Update) -> None:
     if update.message:
-        await update.message.reply_text("⛔ Unauthorized.")
+        await update.effective_message.reply_text("⛔ Unauthorized.")
     log.warning("Unauthorized access attempt from chat %s", update.effective_chat)
 
 
@@ -143,7 +152,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "`/cancel <job_id>` — Cancel a job\n"
         "`/help` — Show help"
     )
-    await update.message.reply_text(text, parse_mode="Markdown")
+    await update.effective_message.reply_text(text, parse_mode="Markdown")
 
 
 async def cmd_recon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -152,14 +161,14 @@ async def cmd_recon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     args = context.args
     if not args:
-        await update.message.reply_text(
+        await update.effective_message.reply_text(
             "Usage: `/recon <target>`\nExample: `/recon example.com`",
             parse_mode="Markdown",
         )
         return
 
     target = args[0].strip()
-    msg = await update.message.reply_text(
+    msg = await update.effective_message.reply_text(
         f"🔍 Queuing recon for `{target}`...", parse_mode="Markdown"
     )
 
@@ -185,7 +194,7 @@ async def cmd_orchestrate(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     args = context.args
     if not args:
-        await update.message.reply_text(
+        await update.effective_message.reply_text(
             "Usage: `/orchestrate <goal>`\nExample: `/orchestrate \"scan vulnweb.com\"`",
             parse_mode="Markdown",
         )
@@ -231,7 +240,7 @@ async def cmd_orchestrate(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         "goal": goal
     }
     
-    await update.message.reply_text(
+    await update.effective_message.reply_text(
         plan_text, 
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(buttons)
@@ -244,11 +253,11 @@ async def cmd_edit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     args = context.args
     if not args:
-        await update.message.reply_text("Usage: `/edit <workflow_name>`", parse_mode="Markdown")
+        await update.effective_message.reply_text("Usage: `/edit <workflow_name>`", parse_mode="Markdown")
         return
 
     workflow = args[0].strip()
-    await update.message.reply_text(
+    await update.effective_message.reply_text(
         f"📝 *YAML Editor (v2)*\nReading `{workflow}.yaml`...\n\n_Note: Inline editing coming in v2.1._",
         parse_mode="Markdown",
     )
@@ -259,7 +268,7 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         return await _unauthorized(update)
 
     if _status_callback is None:
-        await update.message.reply_text("❌ Daemon not connected.")
+        await update.effective_message.reply_text("❌ Daemon not connected.")
         return
 
     try:
@@ -295,19 +304,19 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         except:
             pass
             
-        await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+        await update.effective_message.reply_text("\n".join(lines), parse_mode="Markdown")
         
     except Exception as exc:
-        await update.message.reply_text(f"❌ Error fetching status: {exc}")
+        await update.effective_message.reply_text(f"❌ Error fetching status: {exc}")
 
 async def cmd_email_sort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not _is_allowed(update):
         return await _unauthorized(update)
     if not context.args:
-        return await update.message.reply_text("Usage: `/email_sort <domain>`")
+        return await update.effective_message.reply_text("Usage: `/email_sort <domain>`")
     
     domain = context.args[0]
-    msg = await update.message.reply_text(f"📧 Sorting emails for `{domain}`...")
+    msg = await update.effective_message.reply_text(f"📧 Sorting emails for `{domain}`...")
     
     try:
         from email.m365 import M365Engine
@@ -327,21 +336,21 @@ async def cmd_new_inbox(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     if not _is_allowed(update):
         return await _unauthorized(update)
     if not context.args:
-        return await update.message.reply_text("Usage: `/new_inbox <purpose>`")
+        return await update.effective_message.reply_text("Usage: `/new_inbox <purpose>`")
     
     purpose = context.args[0]
     try:
         from email.gmail import new_inbox
         alias = new_inbox(purpose)
-        await update.message.reply_text(f"🛰 *Alias Monitor Active*\nCreated tracking for: `{alias}`\nPurpose: _{purpose}_")
+        await update.effective_message.reply_text(f"🛰 *Alias Monitor Active*\nCreated tracking for: `{alias}`\nPurpose: _{purpose}_")
     except Exception as e:
-        await update.message.reply_text(f"❌ Failed to create monitor: {e}")
+        await update.effective_message.reply_text(f"❌ Failed to create monitor: {e}")
 
 async def cmd_reply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not _is_allowed(update):
         return await _unauthorized(update)
     if len(context.args) < 2:
-        return await update.message.reply_text("Usage: `/reply <msg_id> <content>`")
+        return await update.effective_message.reply_text("Usage: `/reply <msg_id> <content>`")
     
     msg_id = context.args[0]
     content = " ".join(context.args[1:])
@@ -362,11 +371,11 @@ async def cmd_reply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             from email.m365 import M365Engine
             engine = M365Engine()
             draft_id = engine.draft_reply(msg_id, content)
-            await update.message.reply_text(f"✅ Draft created! ID: `{draft_id}`")
+            await update.effective_message.reply_text(f"✅ Draft created! ID: `{draft_id}`")
         except Exception as e:
-            await update.message.reply_text(f"❌ Drafting failed: {e}")
+            await update.effective_message.reply_text(f"❌ Drafting failed: {e}")
     else:
-        await update.message.reply_text("🚫 Draft aborted.")
+        await update.effective_message.reply_text("🚫 Draft aborted.")
 
 async def cmd_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Natural language data query command."""
@@ -374,10 +383,10 @@ async def cmd_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return await _unauthorized(update)
 
     if not context.args:
-        return await update.message.reply_text("Usage: `/data <natural language query>`")
+        return await update.effective_message.reply_text("Usage: `/data <natural language query>`")
 
     prompt = " ".join(context.args)
-    msg = await update.message.reply_text(f"🔍 Querying: `{prompt}`...")
+    msg = await update.effective_message.reply_text(f"🔍 Querying: `{prompt}`...")
 
     try:
         import data
@@ -403,7 +412,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     db_path = TOKEN_LOG_DB
     if not db_path.exists():
-        await update.message.reply_text("📊 No token log found yet.")
+        await update.effective_message.reply_text("📊 No token log found yet.")
         return
 
     try:
@@ -431,7 +440,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """).fetchone()
         conn.close()
     except Exception as exc:
-        await update.message.reply_text(f"❌ DB error: {exc}")
+        await update.effective_message.reply_text(f"❌ DB error: {exc}")
         return
 
     lines = ["📊 *Inference Usage Dashboard*\n"]
@@ -453,7 +462,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             f"{cost_str}"
         )
 
-    await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+    await update.effective_message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
 async def cmd_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -462,7 +471,7 @@ async def cmd_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     args = context.args
     if not args:
-        await update.message.reply_text("Usage: `/cancel <job_id>`", parse_mode="Markdown")
+        await update.effective_message.reply_text("Usage: `/cancel <job_id>`", parse_mode="Markdown")
         return
 
     job_id = args[0].strip()
@@ -471,11 +480,11 @@ async def cmd_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     future = _pending_approvals.get(f"cancel:{job_id}")
     if future and not future.done():
         future.set_result({"action": "cancel"})
-        await update.message.reply_text(f"🚫 Cancellation signal sent for `{job_id}`.", parse_mode="Markdown")
+        await update.effective_message.reply_text(f"🚫 Cancellation signal sent for `{job_id}`.", parse_mode="Markdown")
     else:
         # Emit via global cancellation set (daemon polls this)
         _cancelled_jobs.add(job_id)
-        await update.message.reply_text(
+        await update.effective_message.reply_text(
             f"🚫 Job `{job_id}` marked for cancellation.", parse_mode="Markdown"
         )
 
@@ -643,17 +652,20 @@ class Notifier:
         self._chat_id = chat_id
         self._bot: "Bot | None" = None
 
-    def _get_bot(self) -> "Bot":
+    def _get_bot(self) -> Any:
         if self._bot is None:
+            if not TELEGRAM_AVAILABLE:
+                raise ImportError("python-telegram-bot not installed")
             self._bot = Bot(token=self._token)
         return self._bot
 
-    async def send(self, text: str, parse_mode: str = "Markdown") -> None:
+    async def send(self, text: str, parse_mode: str = "Markdown", **kwargs) -> None:
         try:
             await self._get_bot().send_message(
                 chat_id=self._chat_id,
                 text=text[:4096],  # Telegram max
                 parse_mode=parse_mode,
+                **kwargs
             )
         except Exception as exc:
             log.error("Telegram send failed: %s", exc)

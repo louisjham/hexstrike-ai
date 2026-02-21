@@ -1,0 +1,12 @@
+[Unit]
+Description=HexClaw Agent
+After=network.target redis.service postgresql.service
+
+[Service]
+ExecStart=/usr/bin/python /mnt/c/antigravity/hexstrike-ai/daemon.py
+WorkingDirectory=/mnt/c/antigravity/hexstrike-ai
+Restart=always
+EnvironmentFile=/mnt/c/antigravity/hexstrike-ai/.env
+
+[Install]
+WantedBy=multi-user.target

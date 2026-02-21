@@ -29,3 +29,756 @@ LINE 1: Error: litellm.AuthenticationError: AuthenticationError...
         ^
 2026-02-20 02:56:12,088 [hexclaw.data] INFO: Stored 1 rows to C:\antigravity\hexstrike-ai\data\test_findings.parquet
 2026-02-20 02:56:30,918 [hexclaw.data] INFO: Stored 1 rows to C:\antigravity\hexstrike-ai\data\test_findings.parquet
+2026-02-21 01:34:48,024 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 01:34:48,026 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': False, 'redis_semantic': False}
+2026-02-21 01:34:48,062 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 01:34:48,062 [hexclaw.telegram] ERROR: Telegram send failed: name 'Bot' is not defined
+2026-02-21 01:34:48,063 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 01:34:48,063 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 01:34:48,071 [hexclaw.telegram] ERROR: python-telegram-bot not installed — Telegram bot disabled
+2026-02-21 01:34:48,071 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 01:34:48,072 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:34:48,073 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:34:48,073 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:34:48,074 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:34:48,076 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:34:48,076 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold
+2026-02-21 01:35:45,281 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 01:35:45,282 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': False, 'redis_semantic': False}
+2026-02-21 01:35:45,292 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 01:35:45,293 [hexclaw.telegram] ERROR: Telegram send failed: name 'Bot' is not defined
+2026-02-21 01:35:45,293 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 01:35:45,294 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 01:35:45,302 [hexclaw.telegram] ERROR: python-telegram-bot not installed — Telegram bot disabled
+2026-02-21 01:35:45,302 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 01:35:45,303 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:35:45,304 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:35:45,305 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:35:45,305 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:35:45,306 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:35:45,306 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold
+2026-02-21 01:37:10,642 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 01:37:10,643 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': False, 'redis_semantic': False}
+2026-02-21 01:37:10,652 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 01:37:10,653 [hexclaw.telegram] ERROR: Telegram send failed: name 'Bot' is not defined
+2026-02-21 01:37:10,654 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 01:37:10,654 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 01:37:10,663 [hexclaw.telegram] ERROR: python-telegram-bot not installed — Telegram bot disabled
+2026-02-21 01:37:10,664 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 01:37:10,665 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:37:10,665 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:37:10,666 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:37:10,667 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:37:10,667 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:37:10,667 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold
+2026-02-21 01:39:12,556 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 01:39:13,576 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 01:39:13,592 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 01:39:13,593 [hexclaw.telegram] ERROR: Telegram send failed: name 'Bot' is not defined
+2026-02-21 01:39:13,601 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 01:39:13,601 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 01:39:13,612 [hexclaw.telegram] ERROR: python-telegram-bot not installed — Telegram bot disabled
+2026-02-21 01:39:13,612 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 01:39:13,613 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:39:13,614 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:39:13,615 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:39:13,616 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:39:13,617 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 01:39:13,617 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold
+2026-02-21 01:46:56,691 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 01:46:57,095 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 01:46:57,106 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 01:46:57,107 [hexclaw.telegram] ERROR: Telegram send failed: python-telegram-bot not installed
+2026-02-21 01:46:57,111 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 01:46:57,112 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 01:46:57,119 [hexclaw.telegram] ERROR: python-telegram-bot not installed — Telegram bot disabled
+2026-02-21 01:46:57,120 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 01:46:58,660 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=554
+2026-02-21 01:46:58,794 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:46:59,463 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:46:59,464 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:46:59,847 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=558
+2026-02-21 01:46:59,848 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:46:59,898 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:46:59,899 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:46:59,921 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=560
+2026-02-21 01:46:59,922 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:46:59,978 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:46:59,978 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,000 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=562
+2026-02-21 01:47:00,001 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,055 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,056 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,076 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=579
+2026-02-21 01:47:00,077 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,120 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,120 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,137 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=564
+2026-02-21 01:47:00,138 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,186 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,186 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,205 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=559
+2026-02-21 01:47:00,207 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,258 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,259 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,277 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=554
+2026-02-21 01:47:00,278 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,330 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,330 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,349 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=563
+2026-02-21 01:47:00,350 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,402 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,402 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,418 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,437 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=558
+2026-02-21 01:47:00,438 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,486 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,486 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,504 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=561
+2026-02-21 01:47:00,505 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,549 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,549 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,566 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=581
+2026-02-21 01:47:00,568 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,616 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,617 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,634 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=567
+2026-02-21 01:47:00,636 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,685 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,686 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,703 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=549
+2026-02-21 01:47:00,705 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,752 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,752 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,767 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,785 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=335
+2026-02-21 01:47:00,786 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,835 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,835 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,854 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=463
+2026-02-21 01:47:00,856 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,907 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,907 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:00,932 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=353
+2026-02-21 01:47:00,933 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:00,988 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:00,988 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,005 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=330
+2026-02-21 01:47:01,006 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,052 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,053 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,071 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=645
+2026-02-21 01:47:01,072 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,122 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,122 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,138 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,158 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=646
+2026-02-21 01:47:01,160 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,214 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,215 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,233 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=646
+2026-02-21 01:47:01,235 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,280 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,280 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,300 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=660
+2026-02-21 01:47:01,302 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,350 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,350 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,368 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=658
+2026-02-21 01:47:01,370 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,416 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,416 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,433 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=594
+2026-02-21 01:47:01,434 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,479 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,479 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,498 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=568
+2026-02-21 01:47:01,499 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,550 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,551 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,566 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,584 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=204
+2026-02-21 01:47:01,585 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,633 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,634 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,650 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=206
+2026-02-21 01:47:01,652 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,698 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,698 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,716 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=332
+2026-02-21 01:47:01,718 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,768 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,768 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,786 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=334
+2026-02-21 01:47:01,787 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,835 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,836 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,855 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=327
+2026-02-21 01:47:01,856 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,911 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,911 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,927 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=335
+2026-02-21 01:47:01,929 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:01,977 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:01,978 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:01,994 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=446
+2026-02-21 01:47:01,996 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,044 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,044 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,060 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=332
+2026-02-21 01:47:02,062 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,110 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,110 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,128 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=302
+2026-02-21 01:47:02,130 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,179 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,180 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,194 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=347
+2026-02-21 01:47:02,195 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,236 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,237 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,251 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=326
+2026-02-21 01:47:02,253 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,294 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,294 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,309 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=368
+2026-02-21 01:47:02,310 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,354 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,355 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,370 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=434
+2026-02-21 01:47:02,371 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,413 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,413 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,429 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=326
+2026-02-21 01:47:02,430 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,472 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,473 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,487 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=332
+2026-02-21 01:47:02,489 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,533 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,533 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,549 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=368
+2026-02-21 01:47:02,550 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,597 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,597 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,612 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,631 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=246
+2026-02-21 01:47:02,633 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,687 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,687 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,704 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=435
+2026-02-21 01:47:02,705 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,752 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,753 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,771 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=321
+2026-02-21 01:47:02,773 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,823 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,823 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,843 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=399
+2026-02-21 01:47:02,844 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,896 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,897 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,915 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=356
+2026-02-21 01:47:02,916 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:02,966 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:02,966 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,981 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:02,999 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,018 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=300
+2026-02-21 01:47:03,020 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,069 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,069 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,088 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=470
+2026-02-21 01:47:03,090 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,138 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,139 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,158 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=603
+2026-02-21 01:47:03,159 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,205 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,206 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,226 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=603
+2026-02-21 01:47:03,227 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,274 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,274 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,293 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=603
+2026-02-21 01:47:03,296 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,342 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,343 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,359 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=147
+2026-02-21 01:47:03,361 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,412 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,413 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,431 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=153
+2026-02-21 01:47:03,432 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,482 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,483 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,500 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=132
+2026-02-21 01:47:03,501 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,550 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,551 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,567 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=226
+2026-02-21 01:47:03,568 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,619 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,619 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,637 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=243
+2026-02-21 01:47:03,639 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,687 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,687 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,704 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=203
+2026-02-21 01:47:03,705 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,754 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,755 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,770 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,790 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=215
+2026-02-21 01:47:03,791 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,840 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,841 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,858 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=210
+2026-02-21 01:47:03,860 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:03,920 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:03,921 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:03,942 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=197
+2026-02-21 01:47:03,944 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,002 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,003 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,026 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=189
+2026-02-21 01:47:04,028 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,087 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,087 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,106 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=261
+2026-02-21 01:47:04,108 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,167 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,168 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,187 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=205
+2026-02-21 01:47:04,188 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,249 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,249 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,269 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=219
+2026-02-21 01:47:04,271 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,327 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,327 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,346 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=155
+2026-02-21 01:47:04,348 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,407 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,407 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,425 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,446 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,466 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,486 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=157
+2026-02-21 01:47:04,488 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,544 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,544 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,560 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,578 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,603 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=163
+2026-02-21 01:47:04,604 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,664 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,664 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,680 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,699 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,720 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=189
+2026-02-21 01:47:04,722 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,775 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,776 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,791 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,811 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,831 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=157
+2026-02-21 01:47:04,833 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,884 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,885 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,902 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=157
+2026-02-21 01:47:04,903 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:04,951 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:04,951 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,967 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:04,985 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:05,005 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=185
+2026-02-21 01:47:05,006 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:05,061 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:05,062 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:05,077 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:05,097 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:05,116 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:05,137 [hexclaw.inference] INFO: LLM call: model=ollama/llama3 tier=low prompt_len=205
+2026-02-21 01:47:05,139 [LiteLLM] INFO: 
+LiteLLM completion() model= llama3; provider = ollama
+2026-02-21 01:47:05,191 [hexclaw.inference] ERROR: Inference FAILED for ollama/llama3: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7bc563afbc50> [Connect call failed ('127.0.0.1', 11434)]
+2026-02-21 01:47:05,192 [hexclaw.monitor] WARNING: Failed to send alert via Telegram: Notifier.send() got an unexpected keyword argument 'disable_web_page_preview'
+2026-02-21 01:47:05,206 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 94 sent, 0 dedup-skipped, 101 below-threshold
+2026-02-21 01:55:40,644 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 01:55:41,355 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 01:55:41,370 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 01:55:43,776 [hexclaw.tg_bot] ERROR: Telegram send failed: Forbidden: bots can't send messages to bots
+2026-02-21 01:55:43,783 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 01:55:43,783 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 01:55:43,855 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 01:55:43,856 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 01:55:45,565 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 0 sent, 94 dedup-skipped, 101 below-threshold
+2026-02-21 01:55:46,004 [telegram.ext.Application] INFO: Application started
+2026-02-21 01:55:46,148 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 02:02:23,887 [hexclaw.tg_bot] WARNING: Unauthorized access attempt from chat Chat(first_name='Louis', id=7990106340, type=<ChatType.PRIVATE>)
+2026-02-21 02:14:14,526 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 02:14:15,023 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 02:14:15,033 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 02:14:16,026 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 02:14:16,027 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 02:14:16,091 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 02:14:16,092 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 02:14:17,990 [hexclaw.inference] INFO: LLM call: model=zhipuai/glm-4 tier=low prompt_len=543
+2026-02-21 02:14:18,110 [hexclaw.inference] ERROR: Inference FAILED for zhipuai/glm-4: litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=zhipuai/glm-4
+ Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers
+2026-02-21 02:14:18,249 [telegram.ext.Application] INFO: Application started
+2026-02-21 02:14:18,385 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 02:14:18,645 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 1 sent, 93 dedup-skipped, 101 below-threshold
+2026-02-21 02:16:13,189 [hexclaw.daemon] INFO: Enqueued job 3ac3cc06: recon_osint on shopgoodwill.com
+2026-02-21 02:16:16,538 [hexclaw.daemon] INFO: [Job 3ac3cc06] Skill dispatch: recon_osint → shopgoodwill.com
+2026-02-21 02:16:16,570 [hexclaw.daemon] INFO: [Job 3ac3cc06] Loaded skill 'recon_osint' with 8 steps
+2026-02-21 02:16:16,570 [hexclaw.daemon] INFO: [Job 3ac3cc06] Step 1/8: tool=amass action=None
+2026-02-21 02:16:16,571 [hexclaw.daemon] INFO: [Job 3ac3cc06] Dispatching tool: amass
+2026-02-21 02:16:18,309 [hexclaw.daemon] INFO: [Job 3ac3cc06] Step 2/8: tool=subfinder action=None
+2026-02-21 02:16:18,310 [hexclaw.daemon] INFO: [Job 3ac3cc06] Dispatching tool: subfinder
+2026-02-21 02:16:19,578 [hexclaw.daemon] INFO: [Job 3ac3cc06] Step 3/8: tool=httpx action=None
+2026-02-21 02:16:19,579 [hexclaw.daemon] INFO: [Job 3ac3cc06] Dispatching tool: httpx
+2026-02-21 02:16:20,852 [hexclaw.daemon] INFO: [Job 3ac3cc06] Step 4/8: tool=rustscan action=None
+2026-02-21 02:16:20,853 [hexclaw.daemon] INFO: [Job 3ac3cc06] Dispatching tool: rustscan
+2026-02-21 02:16:22,126 [hexclaw.daemon] INFO: [Job 3ac3cc06] Step 5/8: tool=nmap action=None
+2026-02-21 02:16:22,127 [hexclaw.daemon] INFO: [Job 3ac3cc06] Dispatching tool: nmap
+2026-02-21 02:16:23,398 [hexclaw.daemon] INFO: [Job 3ac3cc06] Step 6/8: tool=nuclei action=None
+2026-02-21 02:16:23,399 [hexclaw.daemon] INFO: [Job 3ac3cc06] Dispatching tool: nuclei
+2026-02-21 02:16:24,667 [hexclaw.daemon] INFO: [Job 3ac3cc06] Step 7/8: tool=data_store action=store_findings
+2026-02-21 02:16:24,668 [hexclaw.daemon] INFO: [Job 3ac3cc06] Storing findings to analytical layer
+2026-02-21 02:16:24,685 [asyncio] ERROR: Task exception was never retrieved
+future: <Task finished name='Task-44' coro=<run_skill() done, defined at /mnt/c/antigravity/hexstrike-ai/./daemon.py:131> exception=ImportError("Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.\nA suitable version of pyarrow or fastparquet is required for parquet support.\nTrying to import the above resulted in these errors:\n - `Import pyarrow` failed. pyarrow is required for parquet support. Use pip or conda to install the pyarrow package.\n - `Import fastparquet` failed. fastparquet is required for parquet support. Use pip or conda to install the fastparquet package.")>
+Traceback (most recent call last):
+  File "/mnt/c/antigravity/hexstrike-ai/./daemon.py", line 167, in run_skill
+    data.store_parquet(df, f"job_{job_id}")
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/antigravity/hexstrike-ai/data.py", line 89, in store_parquet
+    df.to_parquet(path)
+    ~~~~~~~~~~~~~^^^^^^
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/pandas/core/frame.py", line 3135, in to_parquet
+    return to_parquet(
+        self,
+    ...<7 lines>...
+        **kwargs,
+    )
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/pandas/io/parquet.py", line 486, in to_parquet
+    impl = get_engine(engine)
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/pandas/io/parquet.py", line 68, in get_engine
+    raise ImportError(
+    ...<7 lines>...
+    )
+ImportError: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
+A suitable version of pyarrow or fastparquet is required for parquet support.
+Trying to import the above resulted in these errors:
+ - `Import pyarrow` failed. pyarrow is required for parquet support. Use pip or conda to install the pyarrow package.
+ - `Import fastparquet` failed. fastparquet is required for parquet support. Use pip or conda to install the fastparquet package.
+2026-02-21 02:22:32,221 [hexclaw.planner] INFO: Planning goal: 'create a plan that enables a check of all the us ip blocks and adds them to the database'
+2026-02-21 02:22:32,222 [hexclaw.planner] INFO: Using LLM planner (litellm + Gemini available)
+2026-02-21 02:22:32,223 [hexclaw.planner] INFO: Extracted target: unknown
+2026-02-21 02:22:32,224 [hexclaw.planner] INFO: No rule matched → default skill: agent_plan
+2026-02-21 02:23:08,805 [telegram.ext.Application] INFO: Application is stopping. This might take a moment.
+2026-02-21 02:23:08,807 [telegram.ext.Application] CRITICAL: Fetching updates was aborted due to CancelledError(). Suppressing exception to ensure graceful shutdown.
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/mnt/c/antigravity/hexstrike-ai/./daemon.py", line 277, in main
+    await daemon.run_forever()
+  File "/mnt/c/antigravity/hexstrike-ai/./daemon.py", line 273, in run_forever
+    await asyncio.sleep(5) # Heartbeat interval
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/tasks.py", line 718, in sleep
+    return await future
+           ^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_application.py", line 1233, in _update_fetcher
+    await self.__update_fetcher()
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_application.py", line 1212, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+2026-02-21 02:23:08,848 [telegram.ext.Application] INFO: Application.stop() complete
+2026-02-21 02:23:08,848 [hexclaw.tg_bot] INFO: Telegram bot stopped.
+2026-02-21 02:28:19,608 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 02:28:20,086 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 02:28:20,098 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 02:28:20,920 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 02:28:20,921 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 02:28:20,981 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 02:28:20,981 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 02:28:22,575 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 0 sent, 94 dedup-skipped, 101 below-threshold
+2026-02-21 02:28:22,955 [telegram.ext.Application] INFO: Application started
+2026-02-21 02:28:23,098 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 02:29:56,472 [hexclaw.daemon] INFO: Enqueued job f7c405fa: recon_osint on shopgoodwill.com
+2026-02-21 02:30:01,321 [hexclaw.daemon] INFO: [Job f7c405fa] Skill dispatch: recon_osint → shopgoodwill.com
+2026-02-21 02:30:01,350 [hexclaw.daemon] INFO: [Job f7c405fa] Loaded skill 'recon_osint' with 8 steps
+2026-02-21 02:30:01,350 [hexclaw.daemon] INFO: [Job f7c405fa] Step 1/8: tool=amass action=None
+2026-02-21 02:30:01,351 [hexclaw.daemon] INFO: [Job f7c405fa] Dispatching tool: amass
+2026-02-21 02:30:03,388 [hexclaw.daemon] INFO: [Job f7c405fa] Step 2/8: tool=subfinder action=None
+2026-02-21 02:30:03,390 [hexclaw.daemon] INFO: [Job f7c405fa] Dispatching tool: subfinder
+2026-02-21 02:30:04,678 [hexclaw.daemon] INFO: [Job f7c405fa] Step 3/8: tool=httpx action=None
+2026-02-21 02:30:04,679 [hexclaw.daemon] INFO: [Job f7c405fa] Dispatching tool: httpx
+2026-02-21 02:30:05,962 [hexclaw.daemon] INFO: [Job f7c405fa] Step 4/8: tool=rustscan action=None
+2026-02-21 02:30:05,964 [hexclaw.daemon] INFO: [Job f7c405fa] Dispatching tool: rustscan
+2026-02-21 02:30:07,238 [hexclaw.daemon] INFO: [Job f7c405fa] Step 5/8: tool=nmap action=None
+2026-02-21 02:30:07,239 [hexclaw.daemon] INFO: [Job f7c405fa] Dispatching tool: nmap
+2026-02-21 02:30:08,517 [hexclaw.daemon] INFO: [Job f7c405fa] Step 6/8: tool=nuclei action=None
+2026-02-21 02:30:08,518 [hexclaw.daemon] INFO: [Job f7c405fa] Dispatching tool: nuclei
+2026-02-21 02:30:09,794 [hexclaw.daemon] INFO: [Job f7c405fa] Step 7/8: tool=data_store action=store_findings
+2026-02-21 02:30:09,795 [hexclaw.daemon] INFO: [Job f7c405fa] Storing findings to analytical layer
+2026-02-21 02:30:09,946 [hexclaw.data] INFO: Stored 2 rows to /mnt/c/antigravity/hexstrike-ai/data/job_f7c405fa.parquet
+2026-02-21 02:30:09,946 [hexclaw.daemon] INFO: [Job f7c405fa] Stored 2 findings to parquet
+2026-02-21 02:30:10,233 [hexclaw.daemon] INFO: [Job f7c405fa] Step 8/8: tool=suggest_next action=suggest_next
+2026-02-21 02:30:10,234 [hexclaw.daemon] INFO: [Job f7c405fa] Generating next-step suggestions for recon_osint
+2026-02-21 02:30:10,354 [hexclaw.daemon] INFO: [Job f7c405fa] Suggestions: ['Deep scan target', 'Identify tech stack'] | Top CVEs: 🔥 *Top Critical/High Vulnerabilities*
+• *[HIGH]* `cve-2023-1234` on `shopgoodwil
+2026-02-21 02:30:10,354 [hexclaw.daemon] INFO: [Job f7c405fa] Awaiting operator approval (timeout=300s)
+2026-02-21 02:34:06,049 [hexclaw.inference] INFO: LLM call: model=openai/glm-4.7 tier=med prompt_len=202
+2026-02-21 02:34:06,130 [LiteLLM] INFO: 
+LiteLLM completion() model= glm-4.7; provider = openai
+2026-02-21 02:34:06,867 [asyncio] ERROR: Task was destroyed but it is pending!
+task: <Task pending name='Task-2' coro=<run_bot_async() running at /mnt/c/antigravity/hexstrike-ai/tg_bot.py:820> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+2026-02-21 02:34:17,392 [hexclaw.inference] ERROR: Inference FAILED for openai/glm-4.7: unsupported format string passed to NoneType.__format__
+2026-02-21 02:34:17,393 [hexclaw.data] ERROR: LLM returned error instead of SQL: Error: unsupported format string passed to NoneType.__format__
+2026-02-21 05:02:56,003 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 05:02:56,004 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': False, 'redis_semantic': False}
+2026-02-21 05:02:56,013 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 05:02:57,029 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/sendMessage "HTTP/1.1 200 OK"
+2026-02-21 05:02:57,032 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 05:02:57,033 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 05:02:57,059 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 05:02:57,061 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 05:02:57,062 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 05:02:57,063 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 05:02:57,064 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 05:02:57,065 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 05:02:57,065 [hexclaw.monitor] WARNING: feedparser not installed — `pip install feedparser`
+2026-02-21 05:02:57,066 [hexclaw.monitor] INFO: Monitor pass complete: 0 total, 0 sent, 0 dedup-skipped, 0 below-threshold
+2026-02-21 05:02:57,795 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getMe "HTTP/1.1 200 OK"
+2026-02-21 05:02:57,797 [telegram.ext.Application] INFO: Application started
+2026-02-21 05:02:57,934 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/deleteWebhook "HTTP/1.1 200 OK"
+2026-02-21 05:02:57,936 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 05:02:59,636 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/sendMessage "HTTP/1.1 400 Bad Request"
+2026-02-21 05:02:59,903 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/sendMessage "HTTP/1.1 200 OK"
+2026-02-21 05:03:08,362 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:03:18,511 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:03:28,662 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:03:38,811 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:03:48,962 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:03:59,111 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:04:09,257 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:04:19,406 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:04:29,555 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:04:39,703 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:04:49,848 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:04:59,997 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:05:10,142 [httpx] INFO: HTTP Request: POST https://api.telegram.org/bot8340303830:AAG5p4s9P-8mV38hZBNdyfgApi67Jfi0jjA/getUpdates "HTTP/1.1 200 OK"
+2026-02-21 05:05:10,147 [asyncio] ERROR: Task was destroyed but it is pending!
+task: <Task pending name='Task-2' coro=<run_bot_async() running at /mnt/c/antigravity/hexstrike-ai/tg_bot.py:824> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+2026-02-21 05:05:53,816 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 05:05:54,319 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 05:05:54,329 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 05:05:55,139 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 05:05:55,140 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 05:05:55,201 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 05:05:55,201 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 05:05:56,543 [hexclaw.inference] INFO: LLM call: model=openai/glm-4.7 tier=low prompt_len=583
+2026-02-21 05:05:56,623 [LiteLLM] INFO: 
+LiteLLM completion() model= glm-4.7; provider = openai
+2026-02-21 05:06:00,064 [telegram.ext.Application] INFO: Application started
+2026-02-21 05:06:00,210 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 05:06:09,675 [hexclaw.inference] ERROR: Inference FAILED for openai/glm-4.7: unsupported format string passed to NoneType.__format__
+2026-02-21 05:06:10,754 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 1 sent, 93 dedup-skipped, 101 below-threshold
+2026-02-21 05:10:55,523 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 05:10:55,995 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 05:10:56,006 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 05:10:56,863 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 05:10:56,863 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 05:10:56,925 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 05:10:56,926 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 05:10:58,396 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 0 sent, 94 dedup-skipped, 101 below-threshold
+2026-02-21 05:10:58,502 [telegram.ext.Application] INFO: Application started
+2026-02-21 05:10:58,648 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 05:12:04,190 [telegram.ext.Application] ERROR: No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_application.py", line 1315, in process_update
+    await coroutine
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_handlers/basehandler.py", line 159, in handle_update
+    return await self.callback(update, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/antigravity/hexstrike-ai/tg_bot.py", line 155, in cmd_help
+    await update.message.reply_text(text, parse_mode="Markdown")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'reply_text'
+2026-02-21 05:14:02,426 [telegram.ext.Application] INFO: Application is stopping. This might take a moment.
+2026-02-21 05:14:02,427 [telegram.ext.Application] CRITICAL: Fetching updates was aborted due to CancelledError(). Suppressing exception to ensure graceful shutdown.
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/mnt/c/antigravity/hexstrike-ai/./daemon.py", line 277, in main
+    await daemon.run_forever()
+  File "/mnt/c/antigravity/hexstrike-ai/./daemon.py", line 273, in run_forever
+    await asyncio.sleep(5) # Heartbeat interval
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/tasks.py", line 718, in sleep
+    return await future
+           ^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_application.py", line 673, in stop
+    self.__update_fetcher_task.result()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_application.py", line 1233, in _update_fetcher
+    await self.__update_fetcher()
+  File "/mnt/c/antigravity/hexstrike-ai/.venv/lib/python3.13/site-packages/telegram/ext/_application.py", line 1212, in __update_fetcher
+    update = await self.update_queue.get()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/queues.py", line 186, in get
+    await getter
+asyncio.exceptions.CancelledError
+2026-02-21 05:14:02,443 [telegram.ext.Application] INFO: Application.stop() complete
+2026-02-21 05:14:02,444 [hexclaw.tg_bot] INFO: Telegram bot stopped.
+2026-02-21 05:14:34,520 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 05:14:35,109 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 05:14:35,120 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 05:14:36,251 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 05:14:36,252 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 05:14:36,312 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 05:14:36,313 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 05:14:37,673 [telegram.ext.Application] INFO: Application started
+2026-02-21 05:14:37,695 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 0 sent, 94 dedup-skipped, 101 below-threshold
+2026-02-21 05:14:37,840 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 05:16:07,194 [hexclaw.inference] INFO: LLM call: model=openai/glm-4.7 tier=med prompt_len=202
+2026-02-21 05:16:07,271 [LiteLLM] INFO: 
+LiteLLM completion() model= glm-4.7; provider = openai
+2026-02-21 05:16:08,181 [asyncio] ERROR: Task was destroyed but it is pending!
+task: <Task pending name='Task-2' coro=<run_bot_async() running at /mnt/c/antigravity/hexstrike-ai/tg_bot.py:820> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+2026-02-21 05:16:18,586 [hexclaw.inference] INFO: LLM response: 68↑ 813↓ tokens · $0.0000 · 55 chars
+2026-02-21 05:16:18,619 [hexclaw.data] INFO: Executing SQL: SELECT * FROM jobs ORDER BY id DESC LIMIT 5;
+2026-02-21 05:16:21,253 [hexclaw.data] ERROR: Data query failed: Catalog Error: Table with name jobs does not exist!
+Did you mean "main_jobs.jobs"?
+2026-02-21 05:18:58,049 [hexclaw.daemon] INFO: HexClaw Daemon v1.0 Starting
+2026-02-21 05:18:58,492 [hexclaw.daemon] INFO: Redis Cache Ready: {'hits_exact': 0, 'hits_semantic': 0, 'misses': 0, 'total': 0, 'hit_rate': 0.0, 'embed_backend': 'ngram_numpy', 'redis_exact': True, 'redis_semantic': True}
+2026-02-21 05:18:58,499 [hexclaw.tg_log] INFO: 📡 Telegram log handler installed (level=INFO, batch=3.0s)
+2026-02-21 05:18:59,622 [hexclaw.daemon] INFO: Threat Monitor active.
+2026-02-21 05:18:59,622 [hexclaw.daemon] INFO: Daemon heartbeat active.
+2026-02-21 05:18:59,680 [hexclaw.tg_bot] INFO: Starting Telegram bot (long-polling)...
+2026-02-21 05:18:59,681 [hexclaw.monitor] INFO: Monitor starting (interval=900s, min_severity=medium)
+2026-02-21 05:19:01,063 [hexclaw.monitor] INFO: Monitor pass complete: 195 total, 0 sent, 94 dedup-skipped, 101 below-threshold
+2026-02-21 05:19:01,602 [telegram.ext.Application] INFO: Application started
+2026-02-21 05:19:01,743 [hexclaw.tg_bot] INFO: Telegram bot is running. Waiting for messages...
+2026-02-21 05:20:52,536 [hexclaw.planner] INFO: Planning goal: 'write a python script that pulls a list of all the US IP Blocks'
+2026-02-21 05:20:52,538 [hexclaw.planner] INFO: Using LLM planner (litellm + Gemini available)
+2026-02-21 05:20:52,538 [hexclaw.planner] INFO: Extracted target: unknown
+2026-02-21 05:20:52,540 [hexclaw.planner] INFO: No rule matched → default skill: agent_plan

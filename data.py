@@ -77,6 +77,9 @@ async def query(prompt: str) -> pd.DataFrame:
         _duck.execute("INSTALL sqlite; LOAD sqlite;")
         _duck.execute(f"ATTACH IF NOT EXISTS '{JOBS_DB}' AS main_jobs (TYPE SQLITE)")
         
+        # Set search path so 'jobs' works without 'main_jobs.' prefix
+        _duck.execute("SET search_path = 'main_jobs,main'")
+        
         df = _duck.query(sql).to_df()
         return df
     except Exception as e:

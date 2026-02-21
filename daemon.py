@@ -25,8 +25,8 @@ from typing import Any
 import yaml
 from dotenv import load_dotenv
 
-import telegram as tg_module
-from telegram import Notifier, register_enqueue, register_status, register_orchestrate
+import tg_bot as tg_module
+from tg_bot import Notifier, register_enqueue, register_status, register_orchestrate
 import planner
 import cache
 import inference
